@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D3E1D4">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="380dp"
+        android:layout_height="600dp"
+        android:background="@drawable/relativelayout_corner"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="88dp">
+
+        <!-- Heading -->
+
+
+        <!-- Gender Radio Group -->
+
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/tinos_bold"
+            android:text="Type of Apparel"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout3"
+            android:layout_width="335dp"
+            android:layout_height="50dp"
+            android:background="@drawable/lightgrrenround"
+            tools:layout_editor_absoluteX="14dp"
+            tools:layout_editor_absoluteY="56dp">
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Dropdown (Spinner) -->
+
+            <RadioButton
+                android:id="@+id/radio_other"
+                android:layout_width="110dp"
+                android:layout_height="48dp"
+                android:background="@drawable/lightgrrenround"
+                android:fontFamily="@font/tinos_reg"
+                android:text="Accessory"
+
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                tools:layout_editor_absoluteX="236dp"
+                tools:layout_editor_absoluteY="0dp" />
+        </RadioGroup>
+
+            <RadioButton
+                android:id="@+id/radio_upper"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="248dp"
+                android:fontFamily="@font/tinos_reg"
+                android:text="Upper"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <RadioButton
+                android:id="@+id/radio_lower"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:background="@drawable/lightgrrenround"
+                android:fontFamily="@font/tinos_reg"
+                android:text="Lower"
+
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                tools:layout_editor_absoluteX="128dp"
+                tools:layout_editor_absoluteY="0dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/tinos_bold"
+            android:text="Select Type"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="123dp" />
+
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="124dp"
+            android:layout_height="48dp"
+
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="170dp" />
+
+        <!-- Ownership -->
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:fontFamily="@font/tinos_bold"
+            android:text="Color"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="198dp"
+            tools:layout_editor_absoluteY="233dp" />
+
+        <EditText
+            android:id="@+id/input_color"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:background="@drawable/lightgrrenround"
+            android:hint="Black"
+            android:inputType="text"
+            android:padding="8dp"
+            android:textColorHint="#433F3F"
+            tools:layout_editor_absoluteX="198dp"
+            tools:layout_editor_absoluteY="276dp" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/tinos_bold"
+            android:text="Material"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="233dp" />
+
+        <!-- ImageView to display the uploaded image -->
+
+
+        <!-- Submit Button -->
+
+        <EditText
+            android:id="@+id/input_material"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:background="@drawable/lightgrrenround"
+            android:hint="Cotton"
+            android:inputType="text"
+            android:padding="8dp"
+            android:textColorHint="#433F3F"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="276dp" />
+
+        <Switch
+            android:id="@+id/switch2"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:fontFamily="@font/tinos_bold"
+            android:text="Personal"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            tools:layout_editor_absoluteX="198dp"
+            tools:layout_editor_absoluteY="170dp" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="330dp"
+            android:layout_height="150dp"
+            android:background="@drawable/lightgrrenround"
+            android:contentDescription="image_description"
+            android:scaleType="fitCenter"
+            android:src="@drawable/upload_image"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="345dp" />
+
+        <Button
+            android:id="@+id/button_submit"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:background="@drawable/buttondarkblueround"
+            android:fontFamily="@font/tinos_bold"
+            android:text="Add"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            tools:layout_editor_absoluteX="90dp"
+            tools:layout_editor_absoluteY="518dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/tinos_bold"
+        android:text="ADD APPARELS"
+        android:textColor="@color/black"
+        android:textSize="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

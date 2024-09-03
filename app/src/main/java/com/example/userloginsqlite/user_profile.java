@@ -16,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class user_profile extends AppCompatActivity {
 
+    private static final String TAG = "UserProfileActivity";
+
     Button edit_profile_button;
     ImageView profile_image, backbutton, logout_button;
     TextView txtuserprofilegender, txtuserprofileage, user_name, user_email, user_bio;
@@ -25,6 +27,7 @@ public class user_profile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_user_profile);
 
         // Initialize views
@@ -47,34 +50,38 @@ public class user_profile extends AppCompatActivity {
 
         if (email != null) {
             // Fetch user data from database using email
-            users user = db.getUserByEmail(email);
-            if (user != null) {
-                Log.d("UserProfile", "User found: " + user.getName());
+            try {
+                users user = db.getUserByEmail(email);
+                if (user != null) {
+                    Log.d(TAG, "User found: " + user.getName());
 
-                user_name.setText(user.getName() != null ? user.getName() : "");
-                user_email.setText(user.getEmail() != null ? user.getEmail() : "");
-                txtuserprofilegender.setText(user.getGender() != null ? user.getGender() : "");
-                txtuserprofileage.setText(user.getAge() != 0 ? String.valueOf(user.getAge()) : "");
-                user_bio.setText(user.getBio() != null ? user.getBio() : "");
+                    user_name.setText(user.getName() != null ? user.getName() : "");
+                    user_email.setText(user.getEmail() != null ? user.getEmail() : "");
+                    txtuserprofilegender.setText(user.getGender() != null ? user.getGender() : "");
+                    txtuserprofileage.setText(user.getAge() != 0 ? String.valueOf(user.getAge()) : "");
+                    user_bio.setText(user.getBio() != null ? user.getBio() : "");
 
-                // Set profile image based on gender
-                if ("male".equalsIgnoreCase(user.getGender())) {
-                    profile_image.setImageResource(R.drawable.ic_male);
-                } else if ("female".equalsIgnoreCase(user.getGender())) {
-                    profile_image.setImageResource(R.drawable.ic_female);
+                    // Set profile image based on gender
+                    if ("male".equalsIgnoreCase(user.getGender())) {
+                        profile_image.setImageResource(R.drawable.ic_male);
+                    } else if ("female".equalsIgnoreCase(user.getGender())) {
+                        profile_image.setImageResource(R.drawable.ic_female);
+                    } else {
+                        profile_image.setImageResource(R.drawable.ic_defaultprofile);
+                    }
                 } else {
-                    profile_image.setImageResource(R.drawable.ic_defaultprofile);
+                    Log.d(TAG, "User not found for email: " + email);
                 }
-            } else {
-                Log.d("UserProfile", "User not found for email: " + email);
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching user data", e);
             }
         } else {
-            Log.d("UserProfile", "Email not found in SharedPreferences");
+            Log.d(TAG, "Email not found in SharedPreferences");
         }
 
         // Back button action
         backbutton.setOnClickListener(view -> {
-            Intent intent = new Intent(user_profile.this, Home_Page.class);
+            Intent intent = new Intent(user_profile.this, home_page.class);
             startActivity(intent);
             finish();
         });

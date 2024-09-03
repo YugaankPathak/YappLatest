@@ -1,31 +1,32 @@
 package com.example.userloginsqlite;
 
-// In Home_Page.java
-// In Home_Page.java
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Home_Page extends AppCompatActivity {
-    ImageView male_icon, female_icon, default_icon;
-    dbConnect db;
-    LinearLayout container_profile,container_home,container_wardrobe,container_work,container_style;
+public class home_page extends AppCompatActivity {
+
+    private static final String TAG = "home_page";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home_page);
+
+        ImageView male_icon, female_icon, default_icon;
+        dbConnect db;
+        ConstraintLayout container_profile;
+        LinearLayout container_home, container_wardrobe, container_work, container_style;
 
         male_icon = findViewById(R.id.male_icon);
         female_icon = findViewById(R.id.female_icon);
@@ -49,44 +50,51 @@ public class Home_Page extends AppCompatActivity {
         String email = sharedPreferences.getString("email", null);
 
         if (email != null) {
-            // Fetch gender from database
-            String gender = db.getGenderByEmail(email);
+            try {
+                // Fetch gender from database
+                String gender = db.getGenderByEmail(email);
 
-            // Set visibility based on gender
-            if (gender != null) {
-                switch (gender.toLowerCase()) {
-                    case "male":
-                        male_icon.setVisibility(View.VISIBLE);
-                        female_icon.setVisibility(View.GONE);
-                        default_icon.setVisibility(View.GONE);
-                        break;
-                    case "female":
-                        male_icon.setVisibility(View.GONE);
-                        female_icon.setVisibility(View.VISIBLE);
-                        default_icon.setVisibility(View.GONE);
-                        break;
-                    default:
-                        male_icon.setVisibility(View.GONE);
-                        female_icon.setVisibility(View.GONE);
-                        default_icon.setVisibility(View.VISIBLE);
-                        break;
+                // Set visibility based on gender
+                if (gender != null) {
+                    switch (gender.toLowerCase()) {
+                        case "male":
+                            male_icon.setVisibility(View.VISIBLE);
+                            female_icon.setVisibility(View.GONE);
+                            default_icon.setVisibility(View.GONE);
+                            break;
+                        case "female":
+                            male_icon.setVisibility(View.GONE);
+                            female_icon.setVisibility(View.VISIBLE);
+                            default_icon.setVisibility(View.GONE);
+                            break;
+                        default:
+                            male_icon.setVisibility(View.GONE);
+                            female_icon.setVisibility(View.GONE);
+                            default_icon.setVisibility(View.VISIBLE);
+                            break;
+                    }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching gender from database", e);
             }
+        } else {
+            Log.d(TAG, "No email found in SharedPreferences");
         }
 
+        container_profile.setOnClickListener(view -> {
+            try {
+                Intent i = new Intent(home_page.this, user_profile.class);
+                startActivity(i);
+            } catch (Exception e) {
+                Log.e(TAG, "Error while starting user_profile activity", e);
+            }
+        });
         container_wardrobe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Home_Page.this, wardrobe.class);
+                Intent i = new Intent(home_page.this, WardrobeActivity.class);
                 startActivity(i);
             }
-        });
-
-
-
-        container_profile.setOnClickListener(view -> {
-            Intent i = new Intent(Home_Page.this, user_profile.class);
-            startActivity(i);
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

@@ -2,6 +2,7 @@ package com.example.userloginsqlite;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -43,6 +44,7 @@ public class MainActivity extends ComponentActivity {
         });
 
         btnLoginLog.setOnClickListener(view -> {
+
             Intent i = new Intent(MainActivity.this, login.class);
             startActivity(i);
         });

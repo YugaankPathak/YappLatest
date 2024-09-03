@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +42,8 @@ public class login extends AppCompatActivity {
             startActivity(intent);
         });
 
+
+
         btnlogin.setOnClickListener(view -> {
             String email = ptenteremail.getText().toString().trim();
             String password = ptenterpassword.getText().toString().trim();
@@ -61,8 +64,14 @@ public class login extends AppCompatActivity {
 
                     // Login successful
                     Toast.makeText(login.this, "Login successful", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(login.this, Home_Page.class);
-                    startActivity(intent);
+                    try {
+                        Intent intent = new Intent(login.this, home_page.class);
+                        startActivity(intent);
+                        finish(); // Ensure the login activity is closed
+                    } catch (Exception e) {
+                        Log.e("LoginError", "Error while starting Home_Page activity", e);
+                        Toast.makeText(login.this, "An error occurred while navigating", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     // Invalid password
                     Toast.makeText(login.this, "Invalid email or password", Toast.LENGTH_SHORT).show();

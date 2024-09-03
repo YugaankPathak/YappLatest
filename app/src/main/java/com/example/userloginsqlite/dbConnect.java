@@ -215,22 +215,30 @@ public class dbConnect extends SQLiteOpenHelper {
 
 
     public String getGenderByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+
         SQLiteDatabase db = this.getReadableDatabase();
-        String genderResult = null;  // Avoid using the variable name `gender` which conflicts with the column name
-
-        String query = "SELECT " + gender + " FROM " + dbtable + " WHERE " + emailaddress + " = ?"; // Fixed email column reference
-        Cursor cursor = db.rawQuery(query, new String[]{email});
-
-        if (cursor != null && cursor.moveToFirst()) {
-            genderResult = cursor.getString(cursor.getColumnIndexOrThrow(gender)); // Retrieve gender value
+        String query = "SELECT " + gender + " FROM " + dbtable + " WHERE " + emailaddress + " = ?";
+        Cursor cursor = null;
+        String genderResult = null;
+        try {
+            cursor = db.rawQuery(query, new String[]{email});
+            if (cursor.moveToFirst()) {
+                genderResult = cursor.getString(cursor.getColumnIndexOrThrow(gender));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
         }
-
-        if (cursor != null) {
-            cursor.close(); // Ensure the cursor is closed
-        }
-        db.close(); // Close the database connection
         return genderResult;
     }
+
     public boolean updateUserProfile(users user) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
