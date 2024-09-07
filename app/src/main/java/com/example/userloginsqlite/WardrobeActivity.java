@@ -59,7 +59,7 @@ public class WardrobeActivity extends AppCompatActivity {
 
 
         recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 5));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
         imageList = new ArrayList<>();
         imageAdapter = new ImageAdapter(this, imageList);
