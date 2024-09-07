@@ -15,6 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -22,13 +23,15 @@ import java.util.List;
 
 public class WardrobeActivity extends AppCompatActivity {
 
-    private static final String TAG = "home_page";
-    private RecyclerView recyclerView;
-    private ImageAdapter imageAdapter;
-    private List<byte[]> imageList;
-    private database dbHelper;
-    private Button btnAll, btnUpper, btnLower, btnOthers;
-    private ImageView male_icon, female_icon, default_icon, more_icon;
+    private static final String TAG = "WardrobeActivity";
+    RecyclerView recyclerView;
+    ImageAdapter imageAdapter;
+    List<byte[]> imageList;
+    ImageView image1,image2,image3;
+    database dbHelper; // This should be the database class for apparels
+    dbConnect userDbHelper; // This should be the database class for users
+    Button btnAll, btnUpper, btnLower, btnOthers;
+    ImageView male_icon, female_icon, default_icon, more_icon, icon_home;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,70 +40,37 @@ public class WardrobeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wardrobe);
 
         // Initialize UI elements
-        ConstraintLayout containerProfile = findViewById(R.id.container_profile);
         male_icon = findViewById(R.id.male_icon);
         female_icon = findViewById(R.id.female_icon);
         default_icon = findViewById(R.id.default_icon);
         more_icon = findViewById(R.id.more_icon);
-
+        icon_home = findViewById(R.id.icon_home);
         btnAll = findViewById(R.id.btnallapparels);
         btnUpper = findViewById(R.id.btnupperapparels);
         btnLower = findViewById(R.id.btnlowerapparels);
         btnOthers = findViewById(R.id.btnothers);
+        image1 = findViewById(R.id.image1);
+        image2 = findViewById(R.id.image2);
+        image3 = findViewById(R.id.image3);
+
+
+
+
+
 
         recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 5));
 
         imageList = new ArrayList<>();
         imageAdapter = new ImageAdapter(this, imageList);
         recyclerView.setAdapter(imageAdapter);
 
-        dbHelper = new database(this);
-        dbConnect db;
-
-        // Initialize dbConnect instance
-        db = new dbConnect(this);
-
-        // Set default visibility
-        male_icon.setVisibility(View.GONE);
-        female_icon.setVisibility(View.GONE);
-        default_icon.setVisibility(View.VISIBLE);
+        dbHelper = new database(this); // Apparels database helper
+        userDbHelper = new dbConnect(this); // Users database helper
 
         // Retrieve email from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", null);
-
-        if (email != null) {
-            try {
-                // Fetch gender from database
-                String gender = db.getGenderByEmail(email);
-
-                // Set visibility based on gender
-                if (gender != null) {
-                    switch (gender.toLowerCase()) {
-                        case "male":
-                            male_icon.setVisibility(View.VISIBLE);
-                            female_icon.setVisibility(View.GONE);
-                            default_icon.setVisibility(View.GONE);
-                            break;
-                        case "female":
-                            male_icon.setVisibility(View.GONE);
-                            female_icon.setVisibility(View.VISIBLE);
-                            default_icon.setVisibility(View.GONE);
-                            break;
-                        default:
-                            male_icon.setVisibility(View.GONE);
-                            female_icon.setVisibility(View.GONE);
-                            default_icon.setVisibility(View.VISIBLE);
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error fetching gender from database", e);
-            }
-        } else {
-            Log.d(TAG, "No email found in SharedPreferences");
-        }
 
         more_icon.setOnClickListener(v -> {
             Intent intent = new Intent(WardrobeActivity.this, AddItem.class);
@@ -110,7 +80,7 @@ public class WardrobeActivity extends AppCompatActivity {
         btnAll.setOnClickListener(v -> loadImages("All"));
         btnUpper.setOnClickListener(v -> loadImages("Upper"));
         btnLower.setOnClickListener(v -> loadImages("Lower"));
-        btnOthers.setOnClickListener(v -> loadImages("Other"));
+        btnOthers.setOnClickListener(v -> loadImages("Accessory"));
 
         // Load all images by default
         loadImages("All");
@@ -125,7 +95,6 @@ public class WardrobeActivity extends AppCompatActivity {
 
     private void loadImages(String category) {
         imageList.clear(); // Clear existing images
-        imageAdapter.notifyDataSetChanged(); // Notify adapter about data change
 
         SQLiteDatabase database = dbHelper.getReadableDatabase();
         String selection = null;
@@ -137,7 +106,7 @@ public class WardrobeActivity extends AppCompatActivity {
         }
 
         Cursor cursor = database.query(
-                "apparel",
+                "apparel", // Table name
                 new String[]{"image"},
                 selection,
                 selectionArgs,
@@ -146,16 +115,37 @@ public class WardrobeActivity extends AppCompatActivity {
                 null
         );
 
-        if (cursor.moveToFirst()) {
+        // Variable to keep track of image count
+        int imageCount = 0;
+
+        if (cursor.moveToLast()) {
             do {
                 byte[] imageBlob = cursor.getBlob(0);
-                imageList.add(imageBlob);
-            } while (cursor.moveToNext());
+                imageList.add(0, imageBlob);  // Add images to the start of the list (most recent first)
+                imageCount++;
+            } while (cursor.moveToPrevious());
         }
         cursor.close();
 
-        imageAdapter.notifyDataSetChanged(); // Notify adapter about new data
+        // Update the visibility of the image views based on the number of images
+        updateImageViewsVisibility(imageCount);
+
+        // Notify adapter about new data
+        imageAdapter.notifyDataSetChanged();
     }
 
+    private void updateImageViewsVisibility(int imageCount) {
+        if (imageCount > 0) {
+            // If there are images in the RecyclerView, hide the default images
+            image1.setVisibility(View.GONE);
+            image2.setVisibility(View.GONE);
+            image3.setVisibility(View.GONE);
+        } else {
+            // If there are no images, show the default images
+            image1.setVisibility(View.VISIBLE);
+            image2.setVisibility(View.VISIBLE);
+            image3.setVisibility(View.VISIBLE);
+        }
+    }
 
 }

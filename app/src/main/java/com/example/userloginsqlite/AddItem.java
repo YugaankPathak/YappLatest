@@ -1,6 +1,5 @@
 package com.example.userloginsqlite;
 
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -13,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,7 +22,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,13 +30,13 @@ import androidx.annotation.RequiresApi;
 
 import java.io.ByteArrayOutputStream;
 
-
 public class AddItem extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ImageButton imageButton;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-
+    private byte[] imageBlob; // Store the image as a byte array for saving
+    public int imagecount=0;
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingInflatedId")
     @Override
@@ -47,21 +46,26 @@ public class AddItem extends AppCompatActivity {
 
         RadioGroup radioGroup = findViewById(R.id.radio_group);
         Spinner spinner = findViewById(R.id.spinner_category);
+        imageButton = findViewById(R.id.imageButton);
 
-        // Initialize image picker launcher
+        // Spinner setup
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.categories, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        // Image picker launcher
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
-                // Get the image from the data
                 Uri imageUri = result.getData() != null ? result.getData().getData() : null;
                 if (imageUri != null) {
-                    imageButton.setImageURI(imageUri);
+                    imageButton.setImageURI(imageUri);  // Show selected image
 
                     // Convert the selected image to a BLOB
                     try {
                         ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
                         Bitmap bitmap = ImageDecoder.decodeBitmap(source);
-                        byte[] imageBlob = imageToByteArray(bitmap);
-                        // You can use imageBlob here if needed
+                        imageBlob = imageToByteArray(bitmap);  // Convert the image to byte array
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -69,7 +73,7 @@ public class AddItem extends AppCompatActivity {
             }
         });
 
-        // Initialize permission request launcher
+        // Permission request launcher
         requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -79,7 +83,6 @@ public class AddItem extends AppCompatActivity {
             }
         });
 
-        imageButton = findViewById(R.id.imageButton);
         imageButton.setOnClickListener(view -> handleImageSelection());
 
         database db = new database(this);
@@ -100,12 +103,27 @@ public class AddItem extends AppCompatActivity {
             values.put("material", material);
             values.put("upper_lower", upper);
             values.put("type", selectedCategory);
-            // values.put("image", imageBlob); // Uncomment if you have imageBlob available
+
+            if (imageBlob != null) {
+                values.put("image", imageBlob);  // Save the imageBlob in the database
+            }
 
             long newRowId = db.getWritableDatabase().insert("Apparel", null, values);
 
             if (newRowId != -1) {
                 Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
+                imagecount++;
+                // Clear form fields after submission
+                radioGroup.clearCheck();
+                spinner.setSelection(0);
+                ((EditText) findViewById(R.id.input_color)).setText("");
+                ((EditText) findViewById(R.id.input_material)).setText("");
+                ((Switch) findViewById(R.id.switch2)).setChecked(false);
+                imageButton.setImageResource(android.R.color.transparent);
+
+                Intent intent = new Intent(AddItem.this, WardrobeActivity.class);
+                intent.putExtra("IMAGE_COUNT", imagecount);
+                startActivity(intent);// Clear selected image
             } else {
                 Log.e("DB_INSERT_ERROR", "Error inserting row with values: " + values);
                 Toast.makeText(AddItem.this, "Error adding apparel", Toast.LENGTH_SHORT).show();
@@ -126,6 +144,7 @@ public class AddItem extends AppCompatActivity {
         }
     }
 
+    // Convert Bitmap to byte array
     private byte[] imageToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);

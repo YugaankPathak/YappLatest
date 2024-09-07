@@ -138,6 +138,7 @@
                 android:id="@+id/icon_wardrobe"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
+                android:clickable="true"
 
                 android:contentDescription="@string/wardrobe_desc"
                 android:src="@drawable/ic_wardrobe" />

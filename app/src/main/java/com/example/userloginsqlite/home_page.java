@@ -23,17 +23,17 @@ public class home_page extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        ImageView male_icon, female_icon, default_icon;
+        ImageView male_icon, female_icon, default_icon,icon_wardrobe;
         dbConnect db;
         ConstraintLayout container_profile;
-        LinearLayout container_home, container_wardrobe, container_work, container_style;
+        LinearLayout container_home, container_work, container_style;
 
         male_icon = findViewById(R.id.male_icon);
         female_icon = findViewById(R.id.female_icon);
         default_icon = findViewById(R.id.default_icon);
         container_profile = findViewById(R.id.container_profile);
         container_home = findViewById(R.id.container_home);
-        container_wardrobe = findViewById(R.id.container_wardrobe);
+        icon_wardrobe = findViewById(R.id.icon_wardrobe);
         container_work = findViewById(R.id.container_work);
         container_style = findViewById(R.id.container_style);
 
@@ -89,7 +89,7 @@ public class home_page extends AppCompatActivity {
                 Log.e(TAG, "Error while starting user_profile activity", e);
             }
         });
-        container_wardrobe.setOnClickListener(new View.OnClickListener() {
+        icon_wardrobe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(home_page.this, WardrobeActivity.class);

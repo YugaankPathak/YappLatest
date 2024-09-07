@@ -8,4 +8,11 @@
     <string name="wardrobe_text">Wardrobe</string>
     <string name="work_text">Work</string>
     <string name="style_text">StyleHub</string>
+
+    <string-array name="categories">
+        <item>Upper</item>
+        <item>Lower</item>
+        <item>Accessory</item>
+    </string-array>
+
 </resources>
