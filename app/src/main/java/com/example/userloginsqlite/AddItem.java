@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.annotation.RequiresApi;
 
 import java.io.ByteArrayOutputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AddItem extends AppCompatActivity {
 
@@ -44,13 +45,36 @@ public class AddItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-        RadioGroup radioGroup = findViewById(R.id.radio_group);
-        Spinner spinner = findViewById(R.id.spinner_category);
+       // RadioGroup radioGroup = findViewById(R.id.radio_group);
+        //Spinner spinner = findViewById(R.id.spinner_category);
         imageButton = findViewById(R.id.imageButton);
+
+        final int RADIO_UPPER_ID = R.id.radio_upper;
+        final int RADIO_LOWER_ID = R.id.radio_lower;
+        final int RADIO_OTHER_ID = R.id.radio_other;
+
+        AtomicReference<RadioGroup> radioGroup = new AtomicReference<>(findViewById(R.id.radio_group));
+        Spinner spinner = findViewById(R.id.spinner_category);
+
+        radioGroup.get().setOnCheckedChangeListener((group, checkedId) -> {
+            int itemsArray;
+
+            if (checkedId == RADIO_UPPER_ID) {
+                itemsArray = R.array.upper_body_array;
+            } else if (checkedId == RADIO_LOWER_ID) {
+                itemsArray = R.array.lower_body_array;
+            } else if (checkedId == RADIO_OTHER_ID) {
+                itemsArray = R.array.accessory_array;
+            } else {
+                itemsArray = R.array.upper_body_array; // default option
+            }
+
+            updateSpinner(itemsArray, spinner);
+        });
 
         // Spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.categories, android.R.layout.simple_spinner_item);
+                R.array.base_showcase, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -89,7 +113,7 @@ public class AddItem extends AppCompatActivity {
 
         Button submitButton = findViewById(R.id.button_submit);
         submitButton.setOnClickListener(view -> {
-            int radioID = radioGroup.getCheckedRadioButtonId();
+            int radioID = radioGroup.get().getCheckedRadioButtonId();
             RadioButton radioButton = findViewById(radioID);
             String upper = radioButton.getText().toString();
             String selectedCategory = spinner.getSelectedItem().toString();
@@ -114,7 +138,7 @@ public class AddItem extends AppCompatActivity {
                 Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
                 imagecount++;
                 // Clear form fields after submission
-                radioGroup.clearCheck();
+                radioGroup.get().clearCheck();
                 spinner.setSelection(0);
                 ((EditText) findViewById(R.id.input_color)).setText("");
                 ((EditText) findViewById(R.id.input_material)).setText("");
@@ -142,6 +166,16 @@ public class AddItem extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent);
         }
+    }
+
+    private void updateSpinner(int itemsArray, Spinner spinner) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                itemsArray,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     // Convert Bitmap to byte array

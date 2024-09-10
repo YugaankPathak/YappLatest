@@ -1,32 +1,46 @@
 package com.example.userloginsqlite;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import java.util.ArrayList;
+import java.util.List;
 
-public class home_page extends AppCompatActivity {
+public class style_hub extends AppCompatActivity {
 
-    private static final String TAG = "home_page";
+    private RecyclerView recyclerView;
+    private FeedAdapter feedAdapter;
+    private LinearLayoutManager linearLayoutManager;
+    private boolean isLoading = false;
+    private final int visibleThreshold = 5;
+    private List<Item> items = new ArrayList<>();
 
+    private static final String TAG = "style_hub";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_page);
+        setContentView(R.layout.activity_style_hub);
 
         ImageView male_icon, female_icon, default_icon,icon_wardrobe;
         dbConnect db;
@@ -42,15 +56,6 @@ public class home_page extends AppCompatActivity {
         container_work = findViewById(R.id.container_work);
         container_style = findViewById(R.id.container_style);
 
-        ImageView stylehub= findViewById(R.id.icon_style);
-        stylehub.setOnClickListener(view -> {
-            try {
-                Intent s = new Intent(home_page.this, style_hub.class);
-                startActivity(s);
-            } catch (Exception e) {
-                Log.e(TAG, "Error while starting style hub activity", e);
-            }
-        });
 
         // Initialize dbConnect instance
         db = new dbConnect(this);
@@ -98,7 +103,7 @@ public class home_page extends AppCompatActivity {
 
         container_profile.setOnClickListener(view -> {
             try {
-                Intent i = new Intent(home_page.this, user_profile.class);
+                Intent i = new Intent(style_hub.this, user_profile.class);
                 startActivity(i);
             } catch (Exception e) {
                 Log.e(TAG, "Error while starting user_profile activity", e);
@@ -107,15 +112,25 @@ public class home_page extends AppCompatActivity {
         icon_wardrobe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(home_page.this, WardrobeActivity.class);
+                Intent i = new Intent(style_hub.this, WardrobeActivity.class);
                 startActivity(i);
+            }
+        });
+
+        ImageView hom = findViewById(R.id.icon_home);
+        hom.setOnClickListener(view -> {
+            try {
+                Intent h = new Intent(style_hub.this, home_page.class);
+                startActivity(h);
+            } catch (Exception e) {
+                Log.e(TAG, "Error while starting home_page activity", e);
             }
         });
 
         container_work.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent w1 = new Intent(home_page.this, work_space.class);
+                Intent w1 = new Intent(style_hub.this, work_space.class);
                 startActivity(w1);
             }
         });
@@ -126,22 +141,64 @@ public class home_page extends AppCompatActivity {
             return insets;
         });
 
-        CalendarView calendarView = findViewById(R.id.calendarView);
-        calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            String selectedDate = dayOfMonth + "/" + (month + 1) + "/" + year;
-            Toast.makeText(home_page.this, "Selected Date: " + selectedDate, Toast.LENGTH_SHORT).show();
-        });
+        //Yugaank
+        //will req DB commands when we Integrate, rest all should work fine
+        items.add(new Item("Yugaank", R.drawable.ic_image1, R.drawable.ic_like,0));
+        items.add(new Item("Vikas", R.drawable.ic_image2, R.drawable.ic_like,0));
+        items.add(new Item("Amar", R.drawable.ic_image3, R.drawable.ic_like,0));
+        items.add(new Item("Yugaank", R.drawable.ic_image1, R.drawable.ic_like,0));
+        items.add(new Item("Vikas", R.drawable.ic_image2, R.drawable.ic_like,0));
+        items.add(new Item("Amar", R.drawable.ic_image3, R.drawable.ic_like,0));
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+
+        recyclerView = findViewById(R.id.recyclerView);
+        feedAdapter = new FeedAdapter(items);
+        linearLayoutManager = new LinearLayoutManager(this);
+
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(feedAdapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onClick(View view) {
-                // Action to perform when FAB is clicked
-                Toast.makeText(home_page.this, "FAB Clicked!", Toast.LENGTH_SHORT).show();
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int visibleItemCount = recyclerView.getChildCount();
+                int totalItemCount = linearLayoutManager.getItemCount();
+                int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount - visibleThreshold) {
+                    isLoading = true;
+                    loadMoreData();
+                }
             }
         });
 
+        // Initial data load
+        loadMoreData();
 
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
 
+        FeedAdapter adapter = new FeedAdapter(items);
+        recyclerView.setAdapter(adapter);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter.notifyDataSetChanged();
+
+    }
+
+    private void loadMoreData() {
+        // Simulate network or database call
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            List<Item> newItems = fetchData();
+            feedAdapter.addItems(newItems);
+            isLoading = false;
+        }, 2000);
+    }
+
+    private List<Item> fetchData() {
+        // Generate or fetch new items
+        return new ArrayList<>(); // Replace with actual data
     }
 }

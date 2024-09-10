@@ -15,4 +15,26 @@
         <item>Accessory</item>
     </string-array>
 
+    <string-array name="base_showcase">
+        <item>"Choose Type First"</item>
+    </string-array>
+
+    <string-array name="upper_body_array">
+        <item>Shirt</item>
+        <item>T-shirt</item>
+        <item>Hoodie</item>
+        <item>Kurta</item>
+    </string-array>
+
+    <string-array name="lower_body_array">
+        <item>Pants</item>
+        <item>Shorts</item>
+        <item>Jeans</item>
+    </string-array>
+
+    <string-array name="accessory_array">
+        <item>Cap</item>
+        <item>Shoes</item>
+    </string-array>
+
 </resources>

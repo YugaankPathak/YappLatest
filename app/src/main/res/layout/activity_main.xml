@@ -32,13 +32,9 @@
         android:layout_width="220dp"
         android:layout_height="60dp"
         android:layout_marginTop="359dp"
-
         android:background="@drawable/transparent_button_outline"
-
         android:fontFamily="@font/tinos_bold"
         android:outlineProvider="paddedBounds"
-
-
         android:text="Register"
         android:textColor="@drawable/button_selector_color"
         android:textFontWeight="500"
@@ -47,6 +43,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtgreeting" />
+
 
     <TextView
         android:id="@+id/txtgreeting"

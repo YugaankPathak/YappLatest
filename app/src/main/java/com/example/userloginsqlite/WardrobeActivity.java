@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -37,7 +39,7 @@ public class WardrobeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_wardrobe);
+        setContentView(R.layout.dmm);
 
         // Initialize UI elements
         male_icon = findViewById(R.id.male_icon);
@@ -54,10 +56,6 @@ public class WardrobeActivity extends AppCompatActivity {
         image3 = findViewById(R.id.image3);
 
 
-
-
-
-
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
@@ -71,6 +69,46 @@ public class WardrobeActivity extends AppCompatActivity {
         // Retrieve email from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("email", null);
+
+
+        ImageView hom = findViewById(R.id.icon_home);
+        hom.setOnClickListener(view -> {
+            try {
+                Intent h = new Intent(WardrobeActivity.this, home_page.class);
+                startActivity(h);
+            } catch (Exception e) {
+                Log.e(TAG, "Error while starting home_page activity", e);
+            }
+        });
+
+        ImageView ward= findViewById(R.id.icon_style);
+        ward.setOnClickListener( view -> {
+            try {
+                Intent w = new Intent(WardrobeActivity.this, style_hub.class);
+                startActivity(w);
+            } catch (Exception e) {
+                Log.e(TAG, "Error while starting Wardrobe activity", e);
+            }
+        });
+
+        ConstraintLayout container_profile = findViewById(R.id.container_profile);
+        container_profile.setOnClickListener(view -> {
+            try {
+                Intent u = new Intent(WardrobeActivity.this, user_profile.class);
+                startActivity(u);
+            } catch (Exception e) {
+                Log.e(TAG, "Error while starting user_profile activity", e);
+            }
+        });
+
+        LinearLayout container_work = findViewById(R.id.container_work);
+        container_work.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent w1 = new Intent(WardrobeActivity.this, work_space.class);
+                startActivity(w1);
+            }
+        });
 
         more_icon.setOnClickListener(v -> {
             Intent intent = new Intent(WardrobeActivity.this, AddItem.class);
