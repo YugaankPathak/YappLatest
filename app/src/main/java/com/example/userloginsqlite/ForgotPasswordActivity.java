@@ -27,7 +27,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         btnSubmitForgot = findViewById(R.id.btnSubmitForgot);
         txtForgotPasswordMessage = findViewById(R.id.txtForgotPasswordMessage);
 
-        db = new dbConnect(this);
+        db = new dbConnect();
         handler = new Handler();
 
         btnSubmitForgot.setOnClickListener(view -> {

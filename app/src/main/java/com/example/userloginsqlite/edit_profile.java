@@ -32,7 +32,7 @@ public class edit_profile extends AppCompatActivity {
         backimage = findViewById(R.id.backimage);
 
         // Initialize database connection and SharedPreferences
-        db = new dbConnect(this);
+        db = new dbConnect();
         sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         String email = sharedPreferences.getString("user_email", null);
 

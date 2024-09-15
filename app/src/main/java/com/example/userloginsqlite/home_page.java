@@ -53,7 +53,7 @@ public class home_page extends AppCompatActivity {
         });
 
         // Initialize dbConnect instance
-        db = new dbConnect(this);
+        db = new dbConnect();
 
         // Set default visibility
         male_icon.setVisibility(View.GONE);

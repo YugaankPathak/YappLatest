@@ -224,80 +224,80 @@
     <!-- Horizontal Scroll View for Images -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-    android:id="@+id/innerConstraintLayout"
-    android:layout_width="0dp"
-    android:layout_height="50dp"
-    android:layout_marginTop="0dp"
-    android:layout_marginBottom="5dp"
-    android:background="#EFEFEF"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.0"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/txtvirtualwardrobe"
-    app:layout_constraintVertical_bias="0.0">
-
-    <Button
-        android:id="@+id/btnallapparels"
-        android:layout_width="70dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="5dp"
-        android:background="@drawable/button_selector"
-        android:fontFamily="@font/tinos_reg"
-        android:text="All"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnupperapparels"
-        android:layout_width="70dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="10dp"
-        android:background="@drawable/button_selector"
-        android:fontFamily="@font/tinos_reg"
-        android:text="Upper"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toEndOf="@+id/btnallapparels"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnlowerapparels"
-        android:layout_width="70dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="10dp"
-        android:background="@drawable/button_selector"
-        android:fontFamily="@font/tinos_reg"
-        android:text="Lower"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toEndOf="@+id/btnupperapparels"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnothers"
-        android:layout_width="70dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="10dp"
-        android:background="@drawable/button_selector"
-        android:fontFamily="@font/tinos_reg"
-        android:text="Other"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toEndOf="@+id/btnlowerapparels"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/more_icon"
-        android:layout_width="70dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="5dp"
-        android:alpha="0.8"
+        android:id="@+id/innerConstraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="5dp"
+        android:background="#EFEFEF"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnothers"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/more" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtvirtualwardrobe"
+        app:layout_constraintVertical_bias="0.0">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/btnallapparels"
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/button_selector"
+            android:fontFamily="@font/tinos_reg"
+            android:text="All"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnupperapparels"
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/button_selector"
+            android:fontFamily="@font/tinos_reg"
+            android:text="Upper"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toEndOf="@+id/btnallapparels"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnlowerapparels"
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/button_selector"
+            android:fontFamily="@font/tinos_reg"
+            android:text="Lower"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toEndOf="@+id/btnupperapparels"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnothers"
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/button_selector"
+            android:fontFamily="@font/tinos_reg"
+            android:text="Other"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toEndOf="@+id/btnlowerapparels"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/more_icon"
+            android:layout_width="70dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:alpha="0.8"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btnothers"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/more" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/txtvirtualwardrobe"
