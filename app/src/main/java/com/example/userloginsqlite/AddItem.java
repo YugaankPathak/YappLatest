@@ -37,7 +37,9 @@ public class AddItem extends AppCompatActivity {
     private ImageButton imageButton;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private byte[] imageBlob; // Store the image as a byte array for saving
-    public int imagecount=0;
+    private dbConnect database; // Use the dbConnect class for network operations
+    public int imagecount = 0;
+
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingInflatedId")
     @Override
@@ -45,10 +47,7 @@ public class AddItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-       // RadioGroup radioGroup = findViewById(R.id.radio_group);
-        //Spinner spinner = findViewById(R.id.spinner_category);
         imageButton = findViewById(R.id.imageButton);
-
         final int RADIO_UPPER_ID = R.id.radio_upper;
         final int RADIO_LOWER_ID = R.id.radio_lower;
         final int RADIO_OTHER_ID = R.id.radio_other;
@@ -109,7 +108,8 @@ public class AddItem extends AppCompatActivity {
 
         imageButton.setOnClickListener(view -> handleImageSelection());
 
-        database db = new database(this);
+        // Initialize dbConnect
+        database = new dbConnect();
 
         Button submitButton = findViewById(R.id.button_submit);
         submitButton.setOnClickListener(view -> {
@@ -121,38 +121,36 @@ public class AddItem extends AppCompatActivity {
             String material = ((EditText) findViewById(R.id.input_material)).getText().toString();
             boolean isPersonal = ((Switch) findViewById(R.id.switch2)).isChecked();
 
-            ContentValues values = new ContentValues();
-            values.put("ownership", isPersonal ? "Personal" : "Not Owned");
-            values.put("color", color);
-            values.put("material", material);
-            values.put("upper_lower", upper);
-            values.put("type", selectedCategory);
-
+            Apparel apparel = new Apparel();
+            if (isPersonal) apparel.setOwnership("Personal");
+            else apparel.setOwnership("Not Owned");  // Call to setOwnership
+            apparel.setColor(color);
+            apparel.setMaterial(material);
+            apparel.setUpperLower(upper);
+            apparel.setType(selectedCategory);
             if (imageBlob != null) {
-                values.put("image", imageBlob);  // Save the imageBlob in the database
+                apparel.setImage(imageBlob);  // Set the imageBlob in the Apparel object
             }
 
-            long newRowId = db.getWritableDatabase().insert("Apparel", null, values);
+            // Create the apparel record using dbConnect
+            database.createApparel(apparel);
 
-            if (newRowId != -1) {
-                Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
-                imagecount++;
-                // Clear form fields after submission
-                radioGroup.get().clearCheck();
-                spinner.setSelection(0);
-                ((EditText) findViewById(R.id.input_color)).setText("");
-                ((EditText) findViewById(R.id.input_material)).setText("");
-                ((Switch) findViewById(R.id.switch2)).setChecked(false);
-                imageButton.setImageResource(android.R.color.transparent);
+            // Clear form fields after submission
+            radioGroup.get().clearCheck();
+            spinner.setSelection(0);
+            ((EditText) findViewById(R.id.input_color)).setText("");
+            ((EditText) findViewById(R.id.input_material)).setText("");
+            ((Switch) findViewById(R.id.switch2)).setChecked(false);
+            imageButton.setImageResource(android.R.color.transparent);
 
-                Intent intent = new Intent(AddItem.this, WardrobeActivity.class);
-                intent.putExtra("IMAGE_COUNT", imagecount);
-                startActivity(intent);// Clear selected image
-            } else {
-                Log.e("DB_INSERT_ERROR", "Error inserting row with values: " + values);
-                Toast.makeText(AddItem.this, "Error adding apparel", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
+            imagecount++;
+
+            Intent intent = new Intent(AddItem.this, WardrobeActivity.class);
+            intent.putExtra("IMAGE_COUNT", imagecount);
+            startActivity(intent); // Clear selected image
         });
+
     }
 
     private void handleImageSelection() {

@@ -1,270 +1,284 @@
 package com.example.userloginsqlite;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import androidx.annotation.Nullable;
+import android.util.Log;
+import androidx.annotation.NonNull;
 
-public class dbConnect extends SQLiteOpenHelper {
-    private static final String dbname = "findusermanager";
-    private static final int dbVersion = 1;
-    private static final String dbtable = "users";
-    private static final String ID = "id";
-    private static final String name = "name";
-    private static final String emailaddress = "emailaddress";
-    private static final String password = "password";
-    private static final String gender = "gender";
-    private static final String age = "age";
-    private static final String bio = "bio";
+import java.util.List;
 
-    public dbConnect(@Nullable Context context) {
-        super(context, dbname, null, dbVersion);
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
+
+public class dbConnect {
+    private static final String BASE_URL = "http://192.168.174.97:8000/"; // Replace with your actual API URL
+
+    public static Retrofit retrofit;
+    private final ApiService apiService;
+
+    public dbConnect() {
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiService = retrofit.create(ApiService.class);
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String createUserTable = "CREATE TABLE " + dbtable + " (" +
-                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                name + " TEXT, " +
-                emailaddress + " TEXT UNIQUE, " +
-                password + " TEXT, " +
-                gender + " TEXT, " +
-                age + " INTEGER, " +
-                bio + " TEXT)";
-        sqLiteDatabase.execSQL(createUserTable);
+    // Method to create a user (with asynchronous call)
+    public void createUser(users newUser) {
+        Call<Void> call = apiService.createUser(newUser);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("API", "User created successfully!");
+                } else {
+                    Log.e("API", "Failed to create user: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+            }
+        });
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + dbtable);
-        onCreate(sqLiteDatabase);
-    }
-
-    public void addUser(users user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(name, user.getName());
-        values.put(emailaddress, user.getEmail());
-        values.put(password, user.getPassword());
-        values.put(gender, user.getGender());
-        values.put(age, user.getAge());
-        values.put(bio, user.getBio());
-        db.insert(dbtable, null, values);
-        db.close();
-    }
-
+    // Method to check if email exists
     public boolean checkEmailExists(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + dbtable + " WHERE " + emailaddress + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{email});
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
+        Call<Boolean> call = apiService.checkEmailExists(email);
+        try {
+            Response<Boolean> response = call.execute();
+            return response.isSuccessful() && Boolean.TRUE.equals(response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+    public static Retrofit getClient() {
+        return retrofit;
+    }
+
+    // Method to check if name exists
     public boolean checkNameExists(String name) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + dbtable + " WHERE " + this.name + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{name});
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
+        Call<Boolean> call = apiService.checkNameExists(name);
+        try {
+            Response<Boolean> response = call.execute();
+            return response.isSuccessful() && Boolean.TRUE.equals(response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+    // Method to get password by email
     public String getPasswordByEmail(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + password + " FROM " + dbtable + " WHERE " + emailaddress + " = ?";
-        Cursor cursor = null;
-        String passwordResult = null;
-
+        Call<String> call = apiService.getPasswordByEmail(email);
         try {
-            cursor = db.rawQuery(query, new String[]{email});
-            if (cursor != null && cursor.moveToFirst()) {
-                int passwordIndex = cursor.getColumnIndex(password);
-                if (passwordIndex >= 0) {
-                    passwordResult = cursor.getString(passwordIndex);
-                }
-            }
+            Response<String> response = call.execute();
+            return response.isSuccessful() ? response.body() : null;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
+            return null;
         }
-        return passwordResult;
     }
 
+    // Method to get password by name and email
     public String getPasswordByNameAndEmail(String name, String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + password + " FROM " + dbtable + " WHERE " + this.name + " = ? AND " + emailaddress + " = ?";
-        Cursor cursor = null;
-        String passwordResult = null;
-
+        Call<String> call = apiService.getPasswordByNameAndEmail(name, email);
         try {
-            cursor = db.rawQuery(query, new String[]{name, email});
-            if (cursor != null && cursor.moveToFirst()) {
-                int passwordIndex = cursor.getColumnIndex(password);
-                if (passwordIndex >= 0) {
-                    passwordResult = cursor.getString(passwordIndex);
-                }
-            }
+            Response<String> response = call.execute();
+            return response.isSuccessful() ? response.body() : null;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
+            return null;
         }
-        return passwordResult;
     }
 
+    // Method to get user ID by email
     public int getUserIdByEmail(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + ID + " FROM " + dbtable + " WHERE " + emailaddress + " = ?";
-        Cursor cursor = null;
-        int userIdResult = -1;
-
+        Call<Integer> call = apiService.getUserIdByEmail(email);
         try {
-            cursor = db.rawQuery(query, new String[]{email});
-            if (cursor != null && cursor.moveToFirst()) {
-                int idIndex = cursor.getColumnIndex(ID);
-                if (idIndex >= 0) {
-                    userIdResult = cursor.getInt(idIndex);
-                }
-            }
+            Response<Integer> response = call.execute();
+            return response.isSuccessful() ? response.body() : -1;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
+            return -1;
         }
-        return userIdResult;
     }
 
+    // Method to update user
     public void updateUser(users user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(name, user.getName());
-        values.put(emailaddress, user.getEmail());
-        values.put(gender, user.getGender());
-        values.put(age, user.getAge());
-        values.put(bio, user.getBio());
+        Call<Void> call = apiService.updateUser(user);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("API", "User updated successfully!");
+                } else {
+                    Log.e("API", "Failed to update user: " + response.code());
+                }
+            }
 
-        db.update(dbtable, values, ID + " = ?", new String[]{String.valueOf(user.getId())});
-        db.close();
+            @Override
+            public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+            }
+        });
     }
 
-    public users getUserById(int userId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        users user = null;
-
-        String query = "SELECT * FROM " + dbtable + " WHERE " + ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(ID));
-                String name = cursor.getString(cursor.getColumnIndexOrThrow(this.name));
-                String email = cursor.getString(cursor.getColumnIndexOrThrow(emailaddress));
-                String password = cursor.getString(cursor.getColumnIndexOrThrow(this.password));
-                String gender = cursor.getString(cursor.getColumnIndexOrThrow(this.gender));
-                int age = cursor.getInt(cursor.getColumnIndexOrThrow(this.age));
-                String bio = cursor.getString(cursor.getColumnIndexOrThrow(this.bio));
-
-                user = new users(id, name, email, password, gender, age, bio);
+    // Method to create an apparel table
+    public void createApparelTable() {
+        Call<Void> call = apiService.createApparelTable();
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("API", "Apparel table created successfully!");
+                } else {
+                    Log.e("API", "Failed to create apparel table: " + response.code());
+                }
             }
-            cursor.close();
-        }
 
-        db.close();
-        return user;
+            @Override
+            public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+            }
+        });
+    }
+
+    // Method to fetch an image for apparel by category
+    public void fetchImg(String upperLower, Callback<byte[]> callback) {
+        Call<byte[]> call = apiService.fetchImg(upperLower);
+        call.enqueue(new Callback<byte[]>() {
+            @Override
+            public void onResponse(Call<byte[]> call, Response<byte[]> response) {
+                if (response.isSuccessful()) {
+                    callback.onResponse(call, response);
+                } else {
+                    Log.e("API", "Failed to fetch image: " + response.code());
+                    callback.onFailure(call, new Throwable("Failed to fetch image"));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<byte[]> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+                callback.onFailure(call, t);
+            }
+        });
+    }
+
+    // Method to create an apparel entry
+    public void createApparel(Apparel apparel) {
+        Call<Void> call = apiService.createApparel(apparel);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("API", "Apparel created successfully!");
+                } else {
+                    Log.e("API", "Failed to create apparel: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+            }
+        });
     }
 
     public users getUserByEmail(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        users user = null;
-
-        String query = "SELECT * FROM " + dbtable + " WHERE " + emailaddress + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{email});
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                String name = cursor.getString(cursor.getColumnIndexOrThrow(this.name));
-                String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(emailaddress));
-                String gender = cursor.getString(cursor.getColumnIndexOrThrow(this.gender));
-                int age = cursor.getInt(cursor.getColumnIndexOrThrow(this.age));
-                String bio = cursor.getString(cursor.getColumnIndexOrThrow(this.bio));
-
-                user = new users(name, userEmail, gender, age, bio);
+        Call<users> call = apiService.getUserByEmail(email);
+        try {
+            Response<users> response = call.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body(); // Return the user object if the request is successful
+            } else {
+                Log.e("API", "Failed to fetch user: " + response.code());
+                return null;
             }
-            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
+    }
 
-        db.close();
-        return user;
+    public boolean updateUserProfile(users user) {
+        Call<Boolean> call = apiService.updateUserProfile(user);
+        try {
+            Response<Boolean> response = call.execute();
+            return response.isSuccessful() && Boolean.TRUE.equals(response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    // Retrofit API interface
+    public interface ApiService {
+        @POST("users/")
+        Call<Void> createUser(@Body users user);
+
+        @GET("users/email/{email}/")
+        Call<Boolean> checkEmailExists(@Path("email") String email);
+
+        @GET("users/name/{name}/")
+        Call<Boolean> checkNameExists(@Path("name") String name);
+
+        @GET("users/password/email/{email}/")
+        Call<String> getPasswordByEmail(@Path("email") String email);
+        @GET("users/{email}/")
+        Call<users> getUserByEmail(@Path("email") String email);
+
+        @GET("users/password/name/{name}/email/{email}/")
+        Call<String> getPasswordByNameAndEmail(@Path("name") String name, @Path("email") String email);
+
+        @GET("users/id/{email}/")
+        Call<Integer> getUserIdByEmail(@Path("email") String email);
+
+        @PUT("users/update/")
+        Call<Void> updateUser(@Body users user);
+        @PUT("users/profile/update/")
+        Call<Boolean> updateUserProfile(@Body users user);
+        @POST("apparel/")
+        Call<Void> createApparelTable();
+
+        @GET("apparel/{upperLower}/")
+        Call<byte[]> fetchImg(@Path("upperLower") String upperLower);
+
+        @POST("apparel/")
+        Call<Void> createApparel(@Body Apparel apparel);
+
+        @GET("/users/gender/{email}/")
+        Call<String> getGenderByEmail(@Path("email") String email);
+
+        @GET("/apparel/{email}/")
+        Call<List<String>> getAllApparelsByEmail(@Path("email") String email);
+        @GET("/apparel/{email}/{category}/")
+        Call<List<String>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("category") String category);
     }
 
 
     public String getGenderByEmail(String email) {
-        if (email == null) {
-            return null;
-        }
-
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + gender + " FROM " + dbtable + " WHERE " + emailaddress + " = ?";
-        Cursor cursor = null;
-        String genderResult = null;
+        Call<String> call = apiService.getGenderByEmail(email);
         try {
-            cursor = db.rawQuery(query, new String[]{email});
-            if (cursor.moveToFirst()) {
-                genderResult = cursor.getString(cursor.getColumnIndexOrThrow(gender));
-            }
+            Response<String> response = call.execute();
+            return response.isSuccessful() ? response.body() : null;
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            db.close();
+            return null;
         }
-        return genderResult;
     }
-
-    public boolean updateUserProfile(users user) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(name, user.getName());
-        values.put(emailaddress, user.getEmail());
-        values.put(gender, user.getGender());
-        values.put(age, user.getAge());
-        values.put(bio, user.getBio());
-
-        // Use email as the identifier for update
-        int rowsAffected = db.update(dbtable, values, emailaddress + " = ?", new String[]{user.getEmail()});
-        db.close();
-
-        // Return true if at least one row was updated, false otherwise
-        return rowsAffected > 0;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
