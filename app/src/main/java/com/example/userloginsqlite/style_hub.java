@@ -58,7 +58,7 @@ public class style_hub extends AppCompatActivity {
 
 
         // Initialize dbConnect instance
-        db = new dbConnect(this);
+        db = new dbConnect();
 
         // Set default visibility
         male_icon.setVisibility(View.GONE);

@@ -10,13 +10,16 @@ public class users {
     private String bio;
 
     // Constructor for creating a new user (used during registration)
-    public users(String name, String email, String password) {
+    public users(String name, String email, String password, String gender, int age, String bio) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.gender = gender;
+        this.age = age;
+        this.bio = bio;
     }
 
-    // Constructor for updating a user (excludes id and password)
+    // Constructor for updating a user (excluding password)
     public users(String name, String email, String gender, int age, String bio) {
         this.name = name;
         this.email = email;
@@ -25,8 +28,7 @@ public class users {
         this.bio = bio;
     }
 
-
-    // Constructor with all attributes
+    // Constructor with all attributes (including ID)
     public users(int id, String name, String email, String password, String gender, int age, String bio) {
         this.id = id;
         this.name = name;
@@ -36,7 +38,9 @@ public class users {
         this.age = age;
         this.bio = bio;
     }
-    public users(int id, String name, String email, String gender, int age, String bio){
+
+    // Constructor without password (useful for cases where password is not needed)
+    public users(int id, String name, String email, String gender, int age, String bio) {
         this.id = id;
         this.name = name;
         this.email = email;

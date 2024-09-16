@@ -42,7 +42,7 @@ public class work_space extends AppCompatActivity {
 
 
         // Initialize dbConnect instance
-        dbConnect db = new dbConnect(this);
+        dbConnect db = new dbConnect();
         male_icon = findViewById(R.id.male_icon);
         female_icon = findViewById(R.id.female_icon);
         default_icon = findViewById(R.id.default_icon);

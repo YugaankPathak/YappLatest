@@ -42,7 +42,7 @@ public class user_profile extends AppCompatActivity {
         logout_button = findViewById(R.id.logout_button);
 
         // Initialize database and shared preferences
-        db = new dbConnect(this);
+        db = new dbConnect();
         sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
 
         // Get email from shared preferences

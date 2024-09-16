@@ -30,7 +30,7 @@ public class user_profile_setup extends AppCompatActivity {
         edtbio = findViewById(R.id.edtbio);
         btnsave = findViewById(R.id.btnsave);
 
-        db = new dbConnect(this);
+        db = new dbConnect();
 
         // Get the intent data
         Intent intent = getIntent();
