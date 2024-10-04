@@ -7,14 +7,14 @@ public class Apparel {
     private String material;
     private String upperLower;
     private String imageUrl;  // For storing image URL or base64 string
-    private String ownership; // For storing ownership status
+    private int ownership; // For storing user
 
     // Default constructor
     public Apparel() {
     }
 
     // Constructor with parameters
-    public Apparel(String id, String type, String color, String material, String upperLower, String imageUrl, String ownership) {
+    public Apparel(String id, String type, String color, String material, String upperLower, String imageUrl, int ownership) {
         this.id = id;
         this.type = type;
         this.color = color;
@@ -73,7 +73,7 @@ public class Apparel {
         this.imageUrl = imageUrl;
     }
 
-    public String getOwnership() {
+    public int getOwnership() {
         return ownership;
     }
 
@@ -103,8 +103,12 @@ public class Apparel {
         }
     }
 
-    // Set the ownership status
-    public void setOwnership(String ownership) {
+    // Set the owner
+    public void setOwnership(int ownership) {
         this.ownership = ownership;
+    }
+
+    public void getInfo(Apparel a){
+        System.out.println(a.type+" "+a.color+" "+a.ownership);
     }
 }

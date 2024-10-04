@@ -2,8 +2,10 @@ package com.example.userloginsqlite;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -11,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,6 +32,8 @@ import androidx.core.content.ContextCompat;
 import androidx.annotation.RequiresApi;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AddItem extends AppCompatActivity {
@@ -36,7 +41,7 @@ public class AddItem extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ImageButton imageButton;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-    private byte[] imageBlob; // Store the image as a byte array for saving
+    private byte[] imageBytes; // Store the image as a byte array for saving
     private dbConnect database; // Use the dbConnect class for network operations
     public int imagecount = 0;
 
@@ -84,11 +89,12 @@ public class AddItem extends AppCompatActivity {
                 if (imageUri != null) {
                     imageButton.setImageURI(imageUri);  // Show selected image
 
-                    // Convert the selected image to a BLOB
+                    // Convert the selected image to a byte[]
                     try {
-                        ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
-                        Bitmap bitmap = ImageDecoder.decodeBitmap(source);
-                        imageBlob = imageToByteArray(bitmap);  // Convert the image to byte array
+                        imageBytes = UriToByteArrayConverter.getBytesFromUri(getContentResolver(), imageUri);
+                       ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
+                       Bitmap bitmap = ImageDecoder.decodeBitmap(source);
+                        imageBytes = imageToByteArray(bitmap);  // Convert the image to byte array
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -97,14 +103,14 @@ public class AddItem extends AppCompatActivity {
         });
 
         // Permission request launcher
-        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+/*        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(AddItem.this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
-        });
+        }); */
 
         imageButton.setOnClickListener(view -> handleImageSelection());
 
@@ -122,15 +128,25 @@ public class AddItem extends AppCompatActivity {
             boolean isPersonal = ((Switch) findViewById(R.id.switch2)).isChecked();
 
             Apparel apparel = new Apparel();
-            if (isPersonal) apparel.setOwnership("Personal");
-            else apparel.setOwnership("Not Owned");  // Call to setOwnership
+
+           // if (isPersonal) apparel.setOwnership("Personal");
+            //else
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String userID = sharedPreferences.getString("userID", null);
+            Log.e("ID",userID);
+
+            int current_user= Integer.parseInt(userID);
+            apparel.setOwnership(current_user);  // Call to setOwnership
             apparel.setColor(color);
             apparel.setMaterial(material);
             apparel.setUpperLower(upper);
             apparel.setType(selectedCategory);
-            if (imageBlob != null) {
-                apparel.setImage(imageBlob);  // Set the imageBlob in the Apparel object
+            if (imageBytes != null) {
+                String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                apparel.setImageUrl(base64Image);  // Set the imageBlob in the Apparel object
             }
+
+            //apparel.getInfo(apparel);
 
             // Create the apparel record using dbConnect
             database.createApparel(apparel);
@@ -182,4 +198,6 @@ public class AddItem extends AppCompatActivity {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+
 }
+

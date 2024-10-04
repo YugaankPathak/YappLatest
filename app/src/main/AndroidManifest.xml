@@ -28,6 +28,9 @@
             android:name=".work_space"
             android:exported="false"/>
         <activity
+            android:name=".recommendation"
+            android:exported="false"/>
+        <activity
             android:name=".combinations"
             android:exported="false"/>
         <activity

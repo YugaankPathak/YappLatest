@@ -81,12 +81,16 @@ public class login extends AppCompatActivity {
                 // Store email in SharedPreferences
                 SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("email", email);
+                editor.putString("userEmail", email);
+                String idd = db.getUserIdByEmail(email);
+                Log.e("xxxx", idd);
+               // editor.putString("userID",idd);
                 editor.apply();
 
                 // Login successful
                 Toast.makeText(login.this, "Login successful", Toast.LENGTH_SHORT).show();
                 try {
+
                     Intent intent = new Intent(login.this, home_page.class);
                     startActivity(intent);
                     finish(); // Ensure the login activity is closed
