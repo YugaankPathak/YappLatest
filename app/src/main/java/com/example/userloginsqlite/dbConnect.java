@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -17,12 +18,13 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public class dbConnect {
-    private static final String BASE_URL = "http://192.168.174.97:8000/"; // Replace with your actual API URL
+    private static final String BASE_URL = "http://192.168.228.188:8000/"; // Replace with actual API URL
 
     public static Retrofit retrofit;
     private final ApiService apiService;
 
     public dbConnect() {
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -39,6 +41,7 @@ public class dbConnect {
             public void onResponse(Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
                     Log.d("API", "User created successfully!");
+                    Log.d("API",Integer.toString(newUser.getAge()));
                 } else {
                     Log.e("API", "Failed to create user: " + response.code());
                 }
@@ -104,16 +107,32 @@ public class dbConnect {
     }
 
     // Method to get user ID by email
-    public int getUserIdByEmail(String email) {
-        Call<Integer> call = apiService.getUserIdByEmail(email);
-        try {
-            Response<Integer> response = call.execute();
-            return response.isSuccessful() ? response.body() : -1;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
+    public String getUserIdByEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            Log.e("API Error", "Email is null or empty");
+            return "nothing here";
         }
+        Log.e("Info",email);
+        Call<String> call = apiService.getUserIdByEmail(email);
+        try {
+            Response<String> response = call.execute();
+            if (response.isSuccessful()) {
+                String userId = response.body();
+                if (userId != null) {
+                    return userId; // Return the user ID if not null
+                } else {
+                    Log.e("API Error", "Response body is null for email: " + email);
+                }
+            } else {
+                Log.e("API Error", "Response code: " + response.code() + ", Message: " + response.message());
+            }
+        } catch (Exception e) {
+            Log.e("API Error", "Exception occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "nothing"; // Return nothing if any issues occur
     }
+
 
     // Method to update user
     public void updateUser(users user) {
@@ -184,6 +203,7 @@ public class dbConnect {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
+                    apparel.getInfo(apparel);
                     Log.d("API", "Apparel created successfully!");
                 } else {
                     Log.e("API", "Failed to create apparel: " + response.code());
@@ -238,6 +258,7 @@ public class dbConnect {
 
         @GET("users/password/email/{email}/")
         Call<String> getPasswordByEmail(@Path("email") String email);
+
         @GET("users/{email}/")
         Call<users> getUserByEmail(@Path("email") String email);
 
@@ -245,12 +266,14 @@ public class dbConnect {
         Call<String> getPasswordByNameAndEmail(@Path("name") String name, @Path("email") String email);
 
         @GET("users/id/{email}/")
-        Call<Integer> getUserIdByEmail(@Path("email") String email);
+        Call<String> getUserIdByEmail(@Path("email") String email);
 
         @PUT("users/update/")
         Call<Void> updateUser(@Body users user);
+
         @PUT("users/profile/update/")
         Call<Boolean> updateUserProfile(@Body users user);
+
         @POST("apparel/")
         Call<Void> createApparelTable();
 
@@ -265,6 +288,7 @@ public class dbConnect {
 
         @GET("/apparel/{email}/")
         Call<List<String>> getAllApparelsByEmail(@Path("email") String email);
+
         @GET("/apparel/{email}/{category}/")
         Call<List<String>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("category") String category);
     }

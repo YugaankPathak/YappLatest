@@ -1,5 +1,7 @@
 package com.example.userloginsqlite;
 
+import static java.lang.Integer.parseInt;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -57,16 +59,16 @@ public class user_profile_setup extends AppCompatActivity {
 
             int age;
             try {
-                age = Integer.parseInt(ageStr); // Convert age to integer
+                age = parseInt(ageStr); // Convert age to integer
             } catch (NumberFormatException e) {
                 Toast.makeText(user_profile_setup.this, "Invalid age format.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Fetch existing user data and update it
-            int userId = db.getUserIdByEmail(googleEmail); // Fetch user ID using email
-            if (userId != -1) {
-                users user = new users(userId, name, googleEmail, null, gender, age, bio);
+            String userId = db.getUserIdByEmail(googleEmail); // Fetch user ID using email
+            if (userId.isEmpty()) {
+                users user = new users(parseInt(userId), name, googleEmail, null, gender, age, bio);
                 db.updateUser(user); // Update user profile
                 Toast.makeText(user_profile_setup.this, "Profile updated successfully.", Toast.LENGTH_SHORT).show();
 

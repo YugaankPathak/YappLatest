@@ -111,13 +111,13 @@ public class WardrobeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btnAll.setOnClickListener(v -> loadImages("All", email));
-        btnUpper.setOnClickListener(v -> loadImages("Upper", email));
-        btnLower.setOnClickListener(v -> loadImages("Lower", email));
-        btnOthers.setOnClickListener(v -> loadImages("Accessory", email));
+      //  btnAll.setOnClickListener(v -> loadImages("All", email));
+       // btnUpper.setOnClickListener(v -> loadImages("Upper", email));
+     //   btnLower.setOnClickListener(v -> loadImages("Lower", email));
+      //  btnOthers.setOnClickListener(v -> loadImages("Accessory", email));
 
         // Load all images by default
-        loadImages("All", email);
+       // loadImages("All", email);
 
         // Adjust padding for system bars
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container_profile), (v, insets) -> {

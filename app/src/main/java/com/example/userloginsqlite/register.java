@@ -25,9 +25,10 @@ public class register extends AppCompatActivity {
         edtEmail = findViewById(R.id.ptemail);
         edtPassword = findViewById(R.id.ptpassword);
         edtCnfPassword = findViewById(R.id.ptcnfpassword); // Confirm password field
-
+        edtGender= findViewById(R.id.ptgender);
+        edtAge= findViewById(R.id.ptage);
+        edtBio= findViewById(R.id.ptbio);
         btnRegister = findViewById(R.id.btnRegisterLog);
-        btnLogin = findViewById(R.id.btnLoginLog);
 
         // Initialize dbConnect instance
         db = new dbConnect();
@@ -41,9 +42,9 @@ public class register extends AppCompatActivity {
             String confirmPassword = edtCnfPassword.getText().toString().trim();
 
             // Placeholder values for gender, age, and bio
-            String gender = "Not Specified"; // Default gender value
-            int age = 25;                    // Default age value
-            String bio = "No bio available";  // Default bio value
+            String gender = edtGender.getText().toString().trim();
+            int age = Integer.parseInt(edtAge.getText().toString().trim());
+            String bio = edtBio.getText().toString().trim();
 
             // Validate inputs
             if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
@@ -83,15 +84,16 @@ public class register extends AppCompatActivity {
                     }
                 });
             }).start();
+
         });
 
         // Login button click listener
-        btnLogin.setOnClickListener(view -> {
+       /* btnLogin.setOnClickListener(view -> {
             // Navigate to login activity
             Intent intent = new Intent(register.this, login.class);
             startActivity(intent);
             finish();
-        });
+        });*/
     }
 
 }
