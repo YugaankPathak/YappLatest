@@ -1,8 +1,8 @@
 package com.example.userloginsqlite;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,14 +35,12 @@ public class login extends AppCompatActivity {
         ptenterpassword = findViewById(R.id.ptenterpassword);
         btnlogin = findViewById(R.id.btnlogin);
 
-        db = new dbConnect(this);
+        db = new dbConnect();
 
         txtforgotpassword.setOnClickListener(view -> {
             Intent intent = new Intent(login.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
-
-
 
         btnlogin.setOnClickListener(view -> {
             String email = ptenteremail.getText().toString().trim();
@@ -53,33 +51,57 @@ public class login extends AppCompatActivity {
                 return;
             }
 
-            if (db.checkEmailExists(email)) {
-                String storedPassword = db.getPasswordByEmail(email);
-                if (storedPassword != null && storedPassword.equals(password)) {
-                    // Store email in SharedPreferences
-                    SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("email", email);
-                    editor.apply();
+            new LoginTask().execute(email, password);
+        });
+    }
 
-                    // Login successful
-                    Toast.makeText(login.this, "Login successful", Toast.LENGTH_SHORT).show();
-                    try {
-                        Intent intent = new Intent(login.this, home_page.class);
-                        startActivity(intent);
-                        finish(); // Ensure the login activity is closed
-                    } catch (Exception e) {
-                        Log.e("LoginError", "Error while starting Home_Page activity", e);
-                        Toast.makeText(login.this, "An error occurred while navigating", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    // Invalid password
-                    Toast.makeText(login.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+    private class LoginTask extends AsyncTask<String, Void, Boolean> {
+        private String email;
+        private String password;
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            email = params[0];
+            password = params[1];
+
+            // Check if email exists
+            boolean emailExists = db.checkEmailExists(email);
+            if (!emailExists) {
+                return false;
+            }
+
+            // Get password by email
+            String storedPassword = db.getPasswordByEmail(email);
+            return storedPassword != null && storedPassword.equals(password);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                // Store email in SharedPreferences
+                SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("userEmail", email);
+                String idd = db.getUserIdByEmail(email);
+                Log.e("xxxx", idd);
+               // editor.putString("userID",idd);
+                editor.apply();
+
+                // Login successful
+                Toast.makeText(login.this, "Login successful", Toast.LENGTH_SHORT).show();
+                try {
+
+                    Intent intent = new Intent(login.this, home_page.class);
+                    startActivity(intent);
+                    finish(); // Ensure the login activity is closed
+                } catch (Exception e) {
+                    Log.e("LoginError", "Error while starting Home_Page activity", e);
+                    Toast.makeText(login.this, "An error occurred while navigating", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                // Email does not exist
-                Toast.makeText(login.this, "Email does not exist", Toast.LENGTH_SHORT).show();
+                // Invalid email or password
+                Toast.makeText(login.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
             }
-        });
+        }
     }
 }

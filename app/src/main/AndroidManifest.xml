@@ -22,9 +22,13 @@
         android:roundIcon="@drawable/square_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.UserLoginSqlite"
-        tools:targetApi="31">
+        tools:targetApi="31"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".work_space"
+            android:exported="false"/>
+        <activity
+            android:name=".recommendation"
             android:exported="false"/>
         <activity
             android:name=".combinations"

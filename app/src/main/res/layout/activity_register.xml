@@ -34,7 +34,7 @@
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="normal"
-        app:layout_constraintBottom_toTopOf="@+id/ptname"
+        app:layout_constraintTop_toBottomOf="@+id/txtregister"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
@@ -42,20 +42,17 @@
         android:layout_width="336dp"
         android:layout_height="55dp"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="55dp"
         android:background="@drawable/register_button_outline"
         android:elevation="0dp"
         android:ems="10"
-
-
         android:fontFamily="@font/tinos_reg"
         android:hint="John Doe"
         android:inputType="text"
-        android:padding="8dp"
         android:textColor="@color/black"
         android:textColorHint="#4C4949"
+        android:padding="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtregister" />
+        app:layout_constraintTop_toBottomOf="@+id/txtname" />
 
     <TextView
         android:id="@+id/txtemail"
@@ -67,26 +64,115 @@
         android:text="E-mail"
         android:textColor="@color/black"
         android:textSize="22sp"
-        app:layout_constraintBottom_toTopOf="@+id/ptemail"
+        app:layout_constraintTop_toBottomOf="@+id/ptname"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/ptemail"
         android:layout_width="336dp"
         android:layout_height="55dp"
-        android:layout_marginTop="55dp"
         android:background="@drawable/register_button_outline"
         android:ems="10"
         android:fontFamily="@font/tinos_reg"
-        android:hint="Enter your E-mail"
+        android:hint=" Enter your E-mail"
         android:inputType="text"
-        android:padding="8dp"
         android:textColor="@color/black"
         android:textColorHint="#4C4949"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ptname" />
+        app:layout_constraintTop_toBottomOf="@+id/txtemail" />
+
+    <TextView
+    android:id="@+id/txtgender"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="36dp"
+    android:layout_marginBottom="8dp"
+    android:fontFamily="@font/tinos_reg"
+    android:text="Gender"
+    android:textColor="@color/black"
+    android:textSize="22sp"
+    app:layout_constraintTop_toBottomOf="@+id/ptemail"
+    app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/txtage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="200dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/tinos_reg"
+        android:text="Age"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        app:layout_constraintTop_toBottomOf="@+id/ptemail"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/ptgender"
+        android:layout_width="100dp"
+        android:layout_height="55dp"
+        android:background="@drawable/register_button_outline"
+        android:ems="10"
+        android:fontFamily="@font/tinos_reg"
+        android:hint=" Male/Female"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="#4C4949"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtgender" />
+
+    <EditText
+        android:id="@+id/ptage"
+        android:layout_width="100dp"
+        android:layout_height="55dp"
+        android:background="@drawable/register_button_outline"
+        android:ems="10"
+        android:fontFamily="@font/tinos_reg"
+        android:hint=" 18"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="#4C4949"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.65"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtgender" />
+
+    <TextView
+        android:id="@+id/txtbio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/tinos_reg"
+        android:text="Bio"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        app:layout_constraintTop_toBottomOf="@+id/ptgender"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/ptbio"
+        android:layout_width="336dp"
+        android:layout_height="55dp"
+        android:background="@drawable/register_button_outline"
+        android:ems="10"
+        android:fontFamily="@font/tinos_reg"
+        android:hint=" Something about yourself..."
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="#4C4949"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtbio" />
 
     <TextView
         android:id="@+id/txtpassword"
@@ -98,25 +184,24 @@
         android:text="Password"
         android:textColor="@color/black"
         android:textSize="22sp"
-        app:layout_constraintBottom_toTopOf="@+id/ptpassword"
+        app:layout_constraintTop_toBottomOf="@+id/ptbio"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/ptpassword"
         android:layout_width="336dp"
         android:layout_height="55dp"
-        android:layout_marginTop="55dp"
         android:background="@drawable/register_button_outline"
         android:ems="10"
         android:fontFamily="@font/tinos_reg"
-        android:hint="Enter Password"
+        android:hint=" Enter Password"
         android:inputType="textPassword"
-        android:padding="8dp"
         android:textColor="@color/black"
         android:textColorHint="#4C4949"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ptemail" />
+        app:layout_constraintTop_toBottomOf="@+id/txtpassword" />
 
     <TextView
         android:id="@+id/txtcnfpassword"
@@ -128,26 +213,25 @@
         android:text="Confirm Password"
         android:textColor="@color/black"
         android:textSize="22sp"
-        app:layout_constraintBottom_toTopOf="@+id/ptcnfpassword"
+        app:layout_constraintTop_toBottomOf="@+id/ptpassword"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/ptcnfpassword"
         android:layout_width="336dp"
         android:layout_height="55dp"
-        android:layout_marginTop="68dp"
         android:background="@drawable/register_button_outline"
         android:ems="10"
         android:fontFamily="@font/tinos_reg"
-        android:hint="Enter Password"
+        android:hint=" Confirm Password"
         android:inputType="textPassword"
-        android:padding="8dp"
         android:textColor="@color/black"
         android:textColorHint="#4C4949"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ptpassword" />
+        app:layout_constraintTop_toBottomOf="@+id/txtcnfpassword" />
 
     <TextView
         android:id="@+id/txt8charhint"
@@ -155,7 +239,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="7dp"
         android:layout_marginEnd="37dp"
-
         android:text="must contain 8 char."
         android:textColor="#1976D2"
         android:textSize="10sp"
@@ -177,22 +260,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ptcnfpassword" />
-
-    <Button
-        android:id="@+id/btnLoginLog"
-        android:layout_width="336dp"
-        android:layout_height="55dp"
-        android:layout_marginTop="36dp"
-        android:fontFamily="@font/tinos_reg"
-        android:text="LOGIN"
-        android:textSize="18sp"
-        android:backgroundTint="#ff6750a4"
-        android:background="@drawable/buttondarkblueround"
-        android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.48"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnRegisterLog" />
 
     <TextView
         android:id="@+id/txtDisplayInfoReg"

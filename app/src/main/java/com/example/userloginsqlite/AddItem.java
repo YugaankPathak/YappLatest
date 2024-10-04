@@ -2,8 +2,10 @@ package com.example.userloginsqlite;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -11,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -29,6 +32,8 @@ import androidx.core.content.ContextCompat;
 import androidx.annotation.RequiresApi;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AddItem extends AppCompatActivity {
@@ -36,8 +41,10 @@ public class AddItem extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ImageButton imageButton;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-    private byte[] imageBlob; // Store the image as a byte array for saving
-    public int imagecount=0;
+    private byte[] imageBytes; // Store the image as a byte array for saving
+    private dbConnect database; // Use the dbConnect class for network operations
+    public int imagecount = 0;
+
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingInflatedId")
     @Override
@@ -45,10 +52,7 @@ public class AddItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
-       // RadioGroup radioGroup = findViewById(R.id.radio_group);
-        //Spinner spinner = findViewById(R.id.spinner_category);
         imageButton = findViewById(R.id.imageButton);
-
         final int RADIO_UPPER_ID = R.id.radio_upper;
         final int RADIO_LOWER_ID = R.id.radio_lower;
         final int RADIO_OTHER_ID = R.id.radio_other;
@@ -85,11 +89,12 @@ public class AddItem extends AppCompatActivity {
                 if (imageUri != null) {
                     imageButton.setImageURI(imageUri);  // Show selected image
 
-                    // Convert the selected image to a BLOB
+                    // Convert the selected image to a byte[]
                     try {
-                        ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
-                        Bitmap bitmap = ImageDecoder.decodeBitmap(source);
-                        imageBlob = imageToByteArray(bitmap);  // Convert the image to byte array
+                        imageBytes = UriToByteArrayConverter.getBytesFromUri(getContentResolver(), imageUri);
+                       ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), imageUri);
+                       Bitmap bitmap = ImageDecoder.decodeBitmap(source);
+                        imageBytes = imageToByteArray(bitmap);  // Convert the image to byte array
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -98,18 +103,19 @@ public class AddItem extends AppCompatActivity {
         });
 
         // Permission request launcher
-        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+/*        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(AddItem.this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
-        });
+        }); */
 
         imageButton.setOnClickListener(view -> handleImageSelection());
 
-        database db = new database(this);
+        // Initialize dbConnect
+        database = new dbConnect();
 
         Button submitButton = findViewById(R.id.button_submit);
         submitButton.setOnClickListener(view -> {
@@ -121,38 +127,46 @@ public class AddItem extends AppCompatActivity {
             String material = ((EditText) findViewById(R.id.input_material)).getText().toString();
             boolean isPersonal = ((Switch) findViewById(R.id.switch2)).isChecked();
 
-            ContentValues values = new ContentValues();
-            values.put("ownership", isPersonal ? "Personal" : "Not Owned");
-            values.put("color", color);
-            values.put("material", material);
-            values.put("upper_lower", upper);
-            values.put("type", selectedCategory);
+            Apparel apparel = new Apparel();
 
-            if (imageBlob != null) {
-                values.put("image", imageBlob);  // Save the imageBlob in the database
+           // if (isPersonal) apparel.setOwnership("Personal");
+            //else
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            String userID = sharedPreferences.getString("userID", null);
+            Log.e("ID",userID);
+
+            int current_user= Integer.parseInt(userID);
+            apparel.setOwnership(current_user);  // Call to setOwnership
+            apparel.setColor(color);
+            apparel.setMaterial(material);
+            apparel.setUpperLower(upper);
+            apparel.setType(selectedCategory);
+            if (imageBytes != null) {
+                String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                apparel.setImageUrl(base64Image);  // Set the imageBlob in the Apparel object
             }
 
-            long newRowId = db.getWritableDatabase().insert("Apparel", null, values);
+            //apparel.getInfo(apparel);
 
-            if (newRowId != -1) {
-                Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
-                imagecount++;
-                // Clear form fields after submission
-                radioGroup.get().clearCheck();
-                spinner.setSelection(0);
-                ((EditText) findViewById(R.id.input_color)).setText("");
-                ((EditText) findViewById(R.id.input_material)).setText("");
-                ((Switch) findViewById(R.id.switch2)).setChecked(false);
-                imageButton.setImageResource(android.R.color.transparent);
+            // Create the apparel record using dbConnect
+            database.createApparel(apparel);
 
-                Intent intent = new Intent(AddItem.this, WardrobeActivity.class);
-                intent.putExtra("IMAGE_COUNT", imagecount);
-                startActivity(intent);// Clear selected image
-            } else {
-                Log.e("DB_INSERT_ERROR", "Error inserting row with values: " + values);
-                Toast.makeText(AddItem.this, "Error adding apparel", Toast.LENGTH_SHORT).show();
-            }
+            // Clear form fields after submission
+            radioGroup.get().clearCheck();
+            spinner.setSelection(0);
+            ((EditText) findViewById(R.id.input_color)).setText("");
+            ((EditText) findViewById(R.id.input_material)).setText("");
+            ((Switch) findViewById(R.id.switch2)).setChecked(false);
+            imageButton.setImageResource(android.R.color.transparent);
+
+            Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
+            imagecount++;
+
+            Intent intent = new Intent(AddItem.this, WardrobeActivity.class);
+            intent.putExtra("IMAGE_COUNT", imagecount);
+            startActivity(intent); // Clear selected image
         });
+
     }
 
     private void handleImageSelection() {
@@ -184,4 +198,6 @@ public class AddItem extends AppCompatActivity {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
+
 }
+

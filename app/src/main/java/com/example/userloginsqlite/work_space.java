@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 
 public class work_space extends AppCompatActivity {
-    ImageView clothes,hom, style ,wardrobe;
+    ImageView clothes,hom, style ,wardrobe,recommend;
     ConstraintLayout container_profile;
     ImageView male_icon, female_icon, default_icon;
 
@@ -28,7 +28,7 @@ public class work_space extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.work);
 
-
+        recommend= findViewById(R.id.recommend_icon);
         clothes = findViewById(R.id.clothes_icon);
         hom = findViewById(R.id.icon_home);
         style= findViewById(R.id.icon_style);
@@ -40,9 +40,14 @@ public class work_space extends AppCompatActivity {
             startActivity(i);
         });
 
+        recommend.setOnClickListener(view -> {
+            Intent j = new Intent(work_space.this,recommendation.class);
+            startActivity(j);
+        });
+
 
         // Initialize dbConnect instance
-        dbConnect db = new dbConnect(this);
+        dbConnect db = new dbConnect();
         male_icon = findViewById(R.id.male_icon);
         female_icon = findViewById(R.id.female_icon);
         default_icon = findViewById(R.id.default_icon);
