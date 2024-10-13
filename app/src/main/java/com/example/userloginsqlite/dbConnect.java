@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,7 +17,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public class dbConnect {
-    private static final String BASE_URL = "http://192.168.228.188:8000/"; // Replace with actual API URL
+    private static final String BASE_URL = "http://192.168.15.141:8000/"; // Replace with actual API URL
 
     public static Retrofit retrofit;
     private final ApiService apiService;
@@ -154,25 +153,7 @@ public class dbConnect {
         });
     }
 
-    // Method to create an apparel table
-    public void createApparelTable() {
-        Call<Void> call = apiService.createApparelTable();
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Log.d("API", "Apparel table created successfully!");
-                } else {
-                    Log.e("API", "Failed to create apparel table: " + response.code());
-                }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<Void> call, Throwable t) {
-                Log.e("API", "Error occurred: " + t.getMessage());
-            }
-        });
-    }
 
     // Method to fetch an image for apparel by category
     public void fetchImg(String upperLower, Callback<byte[]> callback) {
@@ -216,23 +197,70 @@ public class dbConnect {
             }
         });
     }
-
-    public users getUserByEmail(String email) {
-        Call<users> call = apiService.getUserByEmail(email);
-        try {
-            Response<users> response = call.execute();
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body(); // Return the user object if the request is successful
-            } else {
-                Log.e("API", "Failed to fetch user: " + response.code());
-                return null;
+    public void post_combination(byte[] combination) {
+        Call<Void> call = apiService.post_combination(combination);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("API", "combination saved successfully!");
+                } else {
+                    Log.e("API", "Failed to create combination: " + response.code());
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                Log.e("API", "Error occurred: " + t.getMessage());
+            }
+        });
+    }
+    public void get_last_combinations(int ownership,final OutfitCallback callback) {
+        Call<List<byte[]>> call = apiService.get_last_combinations(ownership);
+        call.enqueue(new Callback<List<byte[]>>() {
+            @Override
+            public void onResponse(Call<List<byte[]>> call, Response<List<byte[]>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());  // Return the list of combinations
+                } else {
+                    callback.onFailure(new Exception("Failed to get combinations"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<byte[]>> call, Throwable t) {
+                callback.onFailure(t);
+            }
+        });
+
+    }
+    // Recommend outfit based on ownership and occasion
+    public void recommendOutfit(int ownership, String occasion, final OutfitCallback callback) {
+        Call<List<byte[]>> call = apiService.recommend_outfit(ownership,occasion);
+        call.enqueue(new Callback<List<byte[]>>() {
+            @Override
+            public void onResponse(Call<List<byte[]>> call, Response<List<byte[]>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());  // Return the list of recommended outfits
+                } else {
+                    callback.onFailure(new Exception("Failed to get outfit recommendations"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<byte[]>> call, Throwable t) {
+                callback.onFailure(t);
+            }
+        });
     }
 
+
+
+
+    public interface OutfitCallback {
+        void onSuccess(List<byte[]> outfits);
+        void onFailure(Throwable t);
+    }
     public boolean updateUserProfile(users user) {
         Call<Boolean> call = apiService.updateUserProfile(user);
         try {
@@ -259,13 +287,11 @@ public class dbConnect {
         @GET("users/password/email/{email}/")
         Call<String> getPasswordByEmail(@Path("email") String email);
 
-        @GET("users/{email}/")
-        Call<users> getUserByEmail(@Path("email") String email);
 
         @GET("users/password/name/{name}/email/{email}/")
         Call<String> getPasswordByNameAndEmail(@Path("name") String name, @Path("email") String email);
 
-        @GET("users/id/{email}/")
+        @GET("users/id/email/{email}/")
         Call<String> getUserIdByEmail(@Path("email") String email);
 
         @PUT("users/update/")
@@ -274,23 +300,73 @@ public class dbConnect {
         @PUT("users/profile/update/")
         Call<Boolean> updateUserProfile(@Body users user);
 
-        @POST("apparel/")
-        Call<Void> createApparelTable();
+        @GET("users/details/email/{email}")
+        Call<users> get_user_by_email(@Path("email") String email);
 
-        @GET("apparel/{upperLower}/")
-        Call<byte[]> fetchImg(@Path("upperLower") String upperLower);
+        @GET("apparel/user/{email}/")
+        Call<byte[]> fetchImg(@Path("email") String email);
 
-        @POST("apparel/")
+        @POST("apparel/create")
         Call<Void> createApparel(@Body Apparel apparel);
 
-        @GET("/users/gender/{email}/")
+        @GET("/users/gender/email/{email}/")
         Call<String> getGenderByEmail(@Path("email") String email);
 
-        @GET("/apparel/{email}/")
-        Call<List<String>> getAllApparelsByEmail(@Path("email") String email);
+        @GET("/apparel/user/{email}/")
+        Call<List<byte[]>> getAllApparelsByEmail(@Path("email") String email);
 
-        @GET("/apparel/{email}/{category}/")
-        Call<List<String>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("category") String category);
+        @GET("/apparel/user/{email}/{upper_lower}/")
+        Call<List<byte[]>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("upper_lower") String upper_lower);
+
+        @POST("/combinations/post/")
+        Call<Void> post_combination(@Body byte[] combination);
+        @POST("/combinations/last/")
+        Call<List<byte[]>> get_last_combinations(@Body int ownership);
+        @POST("/outfit/recommendation/")
+        Call<List<byte[]>> recommend_outfit(@Body int ownership, String occasion);
+
+        @GET("/users/details/email/{email}/")
+        Call<users> getUserByEmail(@Path("email") String email);
+
+
+    }
+    public users getUserByEmail(String email) {
+        Call<users> call = apiService.getUserByEmail(email);
+
+        call.enqueue(new Callback<users>() {
+            @Override
+            public void onResponse(Call<users> call, Response<users> response) {
+                if (response.isSuccessful()) {
+                    users user = response.body();
+                    if (user != null) {
+                        // Handle the success, e.g., display user data
+
+                        Log.d("User Fetch Success", "User Name: " + user.getName());
+
+                        // You can update the UI here
+                    } else {
+                        Log.d("User Fetch Success", "User not found");
+                    }
+                } else {
+                    Log.e("User Fetch Failure", "Response Error: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<users> call, Throwable t) {
+                // Handle failure
+                Log.e("User Fetch Failure", "Error: " + t.getMessage());
+            }
+        });
+
+        return null;
+    }
+
+    // Callback interface
+    public interface UserCallback
+    {
+        void onSuccess(users user);
+        void onFailure(Throwable t);
     }
 
 
@@ -303,6 +379,17 @@ public class dbConnect {
             e.printStackTrace();
             return null;
         }
+
+    }
+
+    public String getAllApparelsByEmail(String email) {
+        Call<List<byte[]>> call = apiService.getAllApparelsByEmail(email);
+        try {
+            Response<List<byte[]>> response = call.execute();
+            return response.isSuccessful() ? response.body().toString() : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
-

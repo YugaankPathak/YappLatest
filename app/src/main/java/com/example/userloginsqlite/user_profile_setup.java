@@ -4,6 +4,7 @@ import static java.lang.Integer.parseInt;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -66,7 +67,8 @@ public class user_profile_setup extends AppCompatActivity {
             }
 
             // Fetch existing user data and update it
-            String userId = db.getUserIdByEmail(googleEmail); // Fetch user ID using email
+            String userId = db.getUserIdByEmail(googleEmail);
+            Log.e("news",userId);// Fetch user ID using email
             if (userId.isEmpty()) {
                 users user = new users(parseInt(userId), name, googleEmail, null, gender, age, bio);
                 db.updateUser(user); // Update user profile

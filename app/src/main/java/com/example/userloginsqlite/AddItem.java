@@ -135,15 +135,15 @@ public class AddItem extends AppCompatActivity {
             String userID = sharedPreferences.getString("userID", null);
             Log.e("ID",userID);
 
-            int current_user= Integer.parseInt(userID);
+            String current_user= userID;
             apparel.setOwnership(current_user);  // Call to setOwnership
             apparel.setColor(color);
             apparel.setMaterial(material);
             apparel.setUpperLower(upper);
-            apparel.setType(selectedCategory);
+
             if (imageBytes != null) {
-                String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-                apparel.setImageUrl(base64Image);  // Set the imageBlob in the Apparel object
+              //  String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+                apparel.setImage(imageBytes);  // Set the imageBlob in the Apparel object
             }
 
             //apparel.getInfo(apparel);
@@ -195,7 +195,7 @@ public class AddItem extends AppCompatActivity {
     // Convert Bitmap to byte array
     private byte[] imageToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         return stream.toByteArray();
     }
 

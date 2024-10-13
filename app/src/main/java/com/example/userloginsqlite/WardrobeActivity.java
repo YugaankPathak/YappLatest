@@ -130,21 +130,21 @@ public class WardrobeActivity extends AppCompatActivity {
     private void loadImages(String category, String email) {
         imageList.clear(); // Clear existing images
 
-        Call<List<String>> call;
+        Call<List<byte[]>> call;
         if (category.equals("All")) {
             call = apiService.getAllApparelsByEmail(email);
         } else {
             call = apiService.getApparelsByTypeAndEmail(email, category);
         }
 
-        call.enqueue(new Callback<List<String>>() {
+        call.enqueue(new Callback<List<byte[]>>() {
             @Override
-            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+            public void onResponse(Call<List<byte[]>> call, Response<List<byte[]>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<String> base64Images = response.body();
+                    List<byte[]> base64Images = response.body();
 
                     // Decode each Base64 string to byte[]
-                    for (String base64Image : base64Images) {
+                    for (byte[] base64Image : base64Images) {
                         byte[] imageBytes = Base64.decode(base64Image, Base64.DEFAULT);
                         imageList.add(imageBytes); // Add to your image list
                     }
@@ -155,7 +155,7 @@ public class WardrobeActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<String>> call, Throwable t) {
+            public void onFailure(Call<List<byte[]>> call, Throwable t) {
                 Log.e(TAG, "Error fetching images", t);
             }
         });
