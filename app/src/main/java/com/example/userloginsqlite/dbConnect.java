@@ -3,24 +3,32 @@ package com.example.userloginsqlite;
 import android.util.Log;
 import androidx.annotation.NonNull;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public class dbConnect {
-    private static final String BASE_URL = "http://192.168.15.141:8000/"; // Replace with actual API URL
+    private static final String BASE_URL = "http://192.168.80.6:8000/"; // Replace with actual API URL
 
     public static Retrofit retrofit;
-    private final ApiService apiService;
+    public final ApiService apiService;
 
     public dbConnect() {
 
@@ -156,11 +164,11 @@ public class dbConnect {
 
 
     // Method to fetch an image for apparel by category
-    public void fetchImg(String upperLower, Callback<byte[]> callback) {
-        Call<byte[]> call = apiService.fetchImg(upperLower);
-        call.enqueue(new Callback<byte[]>() {
+    public void fetchImg(String upperLower, Callback<String> callback) {
+        Call<String> call = apiService.fetchImg(upperLower);
+        call.enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<byte[]> call, Response<byte[]> response) {
+            public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()) {
                     callback.onResponse(call, response);
                 } else {
@@ -170,7 +178,7 @@ public class dbConnect {
             }
 
             @Override
-            public void onFailure(@NonNull Call<byte[]> call, Throwable t) {
+            public void onFailure(@NonNull Call<String> call, Throwable t) {
                 Log.e("API", "Error occurred: " + t.getMessage());
                 callback.onFailure(call, t);
             }
@@ -197,29 +205,47 @@ public class dbConnect {
             }
         });
     }
-    public void post_combination(byte[] combination) {
-        Call<Void> call = apiService.post_combination(combination);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Log.d("API", "combination saved successfully!");
-                } else {
-                    Log.e("API", "Failed to create combination: " + response.code());
-                }
-            }
+    public void post_combination(String combination, String base64Screenshot) {
+        try {
+            // Create JSON object to send combination and screenshot
+            JSONObject requestBodyJson = new JSONObject();
+            requestBodyJson.put("ownership", combination);
+            requestBodyJson.put("image", base64Screenshot);
 
-            @Override
-            public void onFailure(@NonNull Call<Void> call, Throwable t) {
-                Log.e("API", "Error occurred: " + t.getMessage());
-            }
-        });
+            // Convert JSON object to RequestBody
+            RequestBody requestBody = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    requestBodyJson.toString()
+            );
+
+            // Make API call using Retrofit
+            Call<Void> call = apiService.post_combination(requestBody);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        Log.d("API", "Combination saved successfully!");
+                    } else {
+                        Log.e("API", "Failed to create combination: " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Void> call, Throwable t) {
+                    Log.e("API", "Error occurred: " + t.getMessage());
+                }
+            });
+        } catch (JSONException e) {
+            Log.e("API", "JSON error: " + e.getMessage());
+        }
     }
-    public void get_last_combinations(int ownership,final OutfitCallback callback) {
-        Call<List<byte[]>> call = apiService.get_last_combinations(ownership);
-        call.enqueue(new Callback<List<byte[]>>() {
+
+    // Fetch the last combinations based on ownership
+    public void get_last_combinations(String ownership, final OutfitCallback<List<Map<String, String>>> callback) {
+        Call<List<Map<String, String>>> call = apiService.get_last_combinations(ownership);
+        call.enqueue(new Callback<List<Map<String, String>>>() {
             @Override
-            public void onResponse(Call<List<byte[]>> call, Response<List<byte[]>> response) {
+            public void onResponse(Call<List<Map<String, String>>> call, Response<List<Map<String, String>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     callback.onSuccess(response.body());  // Return the list of combinations
                 } else {
@@ -228,39 +254,86 @@ public class dbConnect {
             }
 
             @Override
-            public void onFailure(Call<List<byte[]>> call, Throwable t) {
+            public void onFailure(Call<List<Map<String, String>>> call, Throwable t) {
                 callback.onFailure(t);
             }
         });
-
     }
-    // Recommend outfit based on ownership and occasion
-    public void recommendOutfit(int ownership, String occasion, final OutfitCallback callback) {
-        Call<List<byte[]>> call = apiService.recommend_outfit(ownership,occasion);
-        call.enqueue(new Callback<List<byte[]>>() {
+
+    public void get_all_combinations(String ownership, final OutfitCallback<List<Map<String, String>>> callback) {
+        try {
+            // Create JSON object to send ownership data
+            JSONObject requestBodyJson = new JSONObject();
+            requestBodyJson.put("ownership", ownership);
+
+            // Convert JSON object to RequestBody
+            RequestBody requestBody = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    requestBodyJson.toString()
+                        );
+
+            // Make API call using Retrofit
+            Call<List<Map<String, String>>> call = apiService.get_all_combinations(requestBody);
+            call.enqueue(new Callback<List<Map<String, String>>>() {
+                @Override
+                public void onResponse(Call<List<Map<String, String>>> call, Response<List<Map<String, String>>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<Map<String, String>> combinations = response.body();
+                        Log.d("RetrofitSuccess", "Fetched combinations successfully: " + combinations.size());
+                        callback.onSuccess(combinations);
+                    } else {
+                        try {
+                            // Log error body for better debugging
+                            Log.e("RetrofitError", "Error fetching combinations: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        callback.onFailure(new Exception("Failed to fetch combinations"));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<Map<String, String>>> call, Throwable t) {
+                    Log.e("RetrofitFailure", "Request failed: " + t.getMessage());
+                    callback.onFailure(new Exception("Failed to get combinations", t));
+                }
+            });
+        } catch (Exception e) {
+            Log.e("RetrofitException", "Error creating request body: " + e.getMessage());
+            callback.onFailure(new Exception("Error creating request body", e));
+        }
+    }
+    // Recommend an outfit based on ownership and occasion
+    public void recommendOutfit(String ownership, String occasion, OutfitCallback<Map<String, String>> callback) {
+        // Create an instance of the request body
+        OutfitRequest request = new OutfitRequest(ownership, occasion);
+
+        // Pass the request object to the API method
+        Call<Map<String, String>> call = apiService.recommend_outfit(request);
+
+        call.enqueue(new Callback<Map<String, String>>() {
             @Override
-            public void onResponse(Call<List<byte[]>> call, Response<List<byte[]>> response) {
+            public void onResponse(Call<Map<String, String>> call, Response<Map<String, String>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    callback.onSuccess(response.body());  // Return the list of recommended outfits
+                    callback.onSuccess(response.body());
                 } else {
                     callback.onFailure(new Exception("Failed to get outfit recommendations"));
                 }
             }
 
             @Override
-            public void onFailure(Call<List<byte[]>> call, Throwable t) {
+            public void onFailure(Call<Map<String, String>> call, Throwable t) {
                 callback.onFailure(t);
             }
         });
     }
 
-
-
-
-    public interface OutfitCallback {
-        void onSuccess(List<byte[]> outfits);
+    // Define a generic callback interface for both methods
+    public interface OutfitCallback<T> {
+        void onSuccess(T result);
         void onFailure(Throwable t);
     }
+
     public boolean updateUserProfile(users user) {
         Call<Boolean> call = apiService.updateUserProfile(user);
         try {
@@ -304,7 +377,7 @@ public class dbConnect {
         Call<users> get_user_by_email(@Path("email") String email);
 
         @GET("apparel/user/{email}/")
-        Call<byte[]> fetchImg(@Path("email") String email);
+        Call<String> fetchImg(@Path("email") String email);
 
         @POST("apparel/create")
         Call<Void> createApparel(@Body Apparel apparel);
@@ -313,23 +386,27 @@ public class dbConnect {
         Call<String> getGenderByEmail(@Path("email") String email);
 
         @GET("/apparel/user/{email}/")
-        Call<List<byte[]>> getAllApparelsByEmail(@Path("email") String email);
+        Call<List<Map<String,String>>> getAllApparelsByEmail(@Path("email") String email);
 
         @GET("/apparel/user/{email}/{upper_lower}/")
-        Call<List<byte[]>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("upper_lower") String upper_lower);
+        Call<List<Map<String,String>>> getApparelsByTypeAndEmail(@Path("email") String email, @Path("upper_lower") String upper_lower);
 
         @POST("/combinations/post/")
-        Call<Void> post_combination(@Body byte[] combination);
+        Call<Void> post_combination(@Body RequestBody combination);
         @POST("/combinations/last/")
-        Call<List<byte[]>> get_last_combinations(@Body int ownership);
+        Call<List<Map<String,String>>> get_last_combinations(@Body String ownership);
+        @POST("/combinations/all/")
+        Call<List<Map<String,String>>> get_all_combinations(@Body RequestBody ownership );
+
         @POST("/outfit/recommendation/")
-        Call<List<byte[]>> recommend_outfit(@Body int ownership, String occasion);
+        Call<Map<String, String>> recommend_outfit(@Body OutfitRequest request);
 
         @GET("/users/details/email/{email}/")
         Call<users> getUserByEmail(@Path("email") String email);
 
 
     }
+
     public users getUserByEmail(String email) {
         Call<users> call = apiService.getUserByEmail(email);
 
@@ -382,14 +459,23 @@ public class dbConnect {
 
     }
 
-    public String getAllApparelsByEmail(String email) {
-        Call<List<byte[]>> call = apiService.getAllApparelsByEmail(email);
+    public List<Map<String,String>> getAllApparelsByEmail(String email) {
+        Call<List<Map<String,String>>> call = apiService.getAllApparelsByEmail(email);
         try {
-            Response<List<byte[]>> response = call.execute();
-            return response.isSuccessful() ? response.body().toString() : null;
+            Response<List<Map<String,String>>>response = call.execute();
+            return response.isSuccessful() ? response.body(): null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 }
+class OutfitRequest {
+    String ownership;
+    String occasion;
+
+    // Constructor
+    public OutfitRequest(String ownership, String occasion) {
+        this.ownership = ownership;
+        this.occasion = occasion;
+    }}

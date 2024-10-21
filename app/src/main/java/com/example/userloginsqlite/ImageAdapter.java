@@ -16,9 +16,9 @@ import java.util.List;
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
     private Context context;
-    private List<byte[]> imageList;
+    private List<Bitmap> imageList; // Change to List<Bitmap>
 
-    public ImageAdapter(Context context, List<byte[]> imageList) {
+    public ImageAdapter(Context context, List<Bitmap> imageList) {
         this.context = context;
         this.imageList = imageList;
     }
@@ -32,21 +32,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        byte[] imageBlob = imageList.get(position);
-        if (imageBlob != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBlob, 0, imageBlob.length);
-
-            // No need for dynamic resizing anymore if using GridLayoutManager
+        Bitmap bitmap = imageList.get(position);
+        if (bitmap != null) {
             holder.imageView.setImageBitmap(bitmap);
-
-            // Ensure the ImageView size is 300dp by 300dp
-            ViewGroup.LayoutParams params = holder.imageView.getLayoutParams();
-            params.width = dpToPx(200);
-            params.height = dpToPx(200);
-            holder.imageView.setLayoutParams(params);
+        } else {
+            // Optional: Set a placeholder image if the bitmap is null
+            holder.imageView.setImageResource(R.drawable.placeholder); // Replace with your placeholder image
         }
     }
-
 
     @Override
     public int getItemCount() {
@@ -58,7 +51,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.image_view); // Make sure to use the correct ID
+            imageView = itemView.findViewById(R.id.image_view); // Ensure this ID is correct
         }
     }
 

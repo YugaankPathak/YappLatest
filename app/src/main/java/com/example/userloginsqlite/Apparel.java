@@ -4,7 +4,7 @@ public class Apparel {
     private String color;
     private String material;
     private String upper_lower;
-    private byte[] image;  // For storing image URL or base64 string
+    private String image;  // For storing image URL or base64 string
     private String ownership; // For storing user
 private String occasion;
     // Default constructor
@@ -12,7 +12,7 @@ private String occasion;
     }
 //'ownership', 'color','material', 'upper_lower', 'occasion', 'image'
     // Constructor with parameters
-    public Apparel(String ownership, String color, String material, String upper_lower, String occasion, byte[] image) {
+    public Apparel(String ownership, String color, String material, String upper_lower, String occasion, String image) {
 
         this.ownership = ownership;
         this.color = color;
@@ -56,11 +56,11 @@ private String occasion;
         this.upper_lower = upperLower;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
