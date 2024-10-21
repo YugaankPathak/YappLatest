@@ -66,26 +66,32 @@ public class login extends AppCompatActivity {
 
             // Check if email exists
             boolean emailExists = db.checkEmailExists(email);
+
             if (!emailExists) {
                 return false;
             }
 
             // Get password by email
             String storedPassword = db.getPasswordByEmail(email);
+            // Store email in SharedPreferences
+            SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("userEmail", email);
+            String idd = db.getUserIdByEmail(email);
+           // Log.e("mmm", db.getAllApparelsByEmail("tanmayzitshi0@gmail.com").get(0).get("image"));
+            editor.putString("userID", idd);
+            Log.e("xxxx", email);
+            Log.e("xxxx", idd);
+
+            // editor.putString("userID",idd);
+            editor.apply();
             return storedPassword != null && storedPassword.equals(password);
         }
 
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
-                // Store email in SharedPreferences
-                SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("userEmail", email);
-                String idd = db.getUserIdByEmail(email);
-                Log.e("xxxx", idd);
-               // editor.putString("userID",idd);
-                editor.apply();
+                Log.e("xxxx", email);
 
                 // Login successful
                 Toast.makeText(login.this, "Login successful", Toast.LENGTH_SHORT).show();

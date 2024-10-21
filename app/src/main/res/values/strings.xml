@@ -8,11 +8,16 @@
     <string name="wardrobe_text">Wardrobe</string>
     <string name="work_text">Work</string>
     <string name="style_text">StyleHub</string>
+    <string-array name="occasion_options">
+        <item>Traditional</item>
+        <item>Casual</item>
+        <item>Formal</item>
+    </string-array>
 
     <string-array name="categories">
-        <item>Upper</item>
-        <item>Lower</item>
-        <item>Accessory</item>
+        <item>upper</item>
+        <item>lower</item>
+        <item>accessory</item>
     </string-array>
 
     <string-array name="base_showcase">
@@ -20,16 +25,15 @@
     </string-array>
 
     <string-array name="upper_body_array">
-        <item>Shirt</item>
-        <item>T-shirt</item>
-        <item>Hoodie</item>
-        <item>Kurta</item>
+        <item>Traditional</item>
+        <item>Formal</item>
+        <item>Casual</item>
     </string-array>
 
     <string-array name="lower_body_array">
-        <item>Pants</item>
-        <item>Shorts</item>
-        <item>Jeans</item>
+        <item>Traditional</item>
+        <item>Formal</item>
+        <item>Casual</item>
     </string-array>
 
     <string-array name="accessory_array">

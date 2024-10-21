@@ -1,44 +1,35 @@
 package com.example.userloginsqlite;
 
 public class Apparel {
-    private String id;
-    private String type;
     private String color;
     private String material;
-    private String upperLower;
-    private String imageUrl;  // For storing image URL or base64 string
-    private int ownership; // For storing user
-
+    private String upper_lower;
+    private String image;  // For storing image URL or base64 string
+    private String ownership; // For storing user
+private String occasion;
     // Default constructor
     public Apparel() {
     }
-
+//'ownership', 'color','material', 'upper_lower', 'occasion', 'image'
     // Constructor with parameters
-    public Apparel(String id, String type, String color, String material, String upperLower, String imageUrl, int ownership) {
-        this.id = id;
-        this.type = type;
+    public Apparel(String ownership, String color, String material, String upper_lower, String occasion, String image) {
+
+        this.ownership = ownership;
         this.color = color;
         this.material = material;
-        this.upperLower = upperLower;
-        this.imageUrl = imageUrl;
-        this.ownership = ownership;
+        this.upper_lower = upper_lower;
+        this.image = image;
+        this.occasion = occasion;
     }
 
     // Getters and setters
-    public String getId() {
-        return id;
+
+    public String getOccasion() {
+        return occasion;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public void setOccasion(String occasion) {
+        this.occasion = occasion;
     }
 
     public String getColor() {
@@ -58,22 +49,22 @@ public class Apparel {
     }
 
     public String getUpperLower() {
-        return upperLower;
+        return upper_lower;
     }
 
     public void setUpperLower(String upperLower) {
-        this.upperLower = upperLower;
+        this.upper_lower = upperLower;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getImage() {
+        return image;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImage(String image) {
+        this.image = image;
     }
 
-    public int getOwnership() {
+    public String getOwnership() {
         return ownership;
     }
 
@@ -82,33 +73,23 @@ public class Apparel {
     @Override
     public String toString() {
         return "Apparel{" +
-                "id='" + id + '\'' +
-                ", type='" + type + '\'' +
+
                 ", color='" + color + '\'' +
                 ", material='" + material + '\'' +
-                ", upperLower='" + upperLower + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
+                ", upper_lower='" + upper_lower + '\'' +
+                ", image='" + image + '\'' +
                 ", ownership='" + ownership + '\'' +
                 '}';
     }
 
-    // Set the image from a byte array (convert to base64 if needed)
-    public void setImage(byte[] imageBlob) {
-        if (imageBlob != null) {
-            // Convert byte array to base64 string
-            String base64Image = android.util.Base64.encodeToString(imageBlob, android.util.Base64.DEFAULT);
-            this.imageUrl = "data:image/png;base64," + base64Image;
-        } else {
-            this.imageUrl = null;  // Handle null case
-        }
-    }
+
 
     // Set the owner
-    public void setOwnership(int ownership) {
+    public void setOwnership(String ownership) {
         this.ownership = ownership;
     }
 
     public void getInfo(Apparel a){
-        System.out.println(a.type+" "+a.color+" "+a.ownership);
+        System.out.println(a.occasion+" "+a.upper_lower+" "+a.color+" "+a.ownership);
     }
 }

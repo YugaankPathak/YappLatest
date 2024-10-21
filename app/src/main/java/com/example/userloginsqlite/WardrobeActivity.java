@@ -2,6 +2,8 @@ package com.example.userloginsqlite;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -20,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
 
 import retrofit2.Call;
@@ -29,13 +32,13 @@ import retrofit2.Response;
 public class WardrobeActivity extends AppCompatActivity {
 
     private static final String TAG = "WardrobeActivity";
-    RecyclerView recyclerView;
-    ImageAdapter imageAdapter;
-    List<byte[]> imageList;
-    ImageView image1, image2, image3;
-    Button btnAll, btnUpper, btnLower, btnOthers;
-    ImageView male_icon, female_icon, default_icon, more_icon, icon_home;
-    dbConnect.ApiService apiService; // Retrofit API service
+    private RecyclerView recyclerView;
+    private ImageAdapter imageAdapter;
+    private List<Bitmap> imageList; // Change to List<Bitmap>
+    private ImageView image1, image2, image3;
+    private Button btnAll, btnUpper, btnLower, btnOthers;
+    private ImageView male_icon, female_icon, default_icon, more_icon, icon_home;
+    private dbConnect dbConnectInstance; // Instance of dbConnect class
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,69 +60,65 @@ public class WardrobeActivity extends AppCompatActivity {
         image2 = findViewById(R.id.image2);
         image3 = findViewById(R.id.image3);
 
+        // RecyclerView setup
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
+        // Initialize image list and adapter
         imageList = new ArrayList<>();
         imageAdapter = new ImageAdapter(this, imageList);
         recyclerView.setAdapter(imageAdapter);
 
-        apiService = dbConnect.getClient().create(dbConnect.ApiService.class); // Initialize API service
+        // Initialize dbConnect instance
+        dbConnectInstance = new dbConnect();
 
         // Retrieve email from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String email = sharedPreferences.getString("email", null);
+        String email = sharedPreferences.getString("userEmail", null);
+        Log.e("User Email: ", email != null ? email : "No email found");
 
-        ImageView hom = findViewById(R.id.icon_home);
-        hom.setOnClickListener(view -> {
-            try {
-                Intent h = new Intent(WardrobeActivity.this, home_page.class);
-                startActivity(h);
-            } catch (Exception e) {
-                Log.e(TAG, "Error while starting home_page activity", e);
-            }
-        });
+        // Navigation setup
+        setupNavigation();
 
-        ImageView ward = findViewById(R.id.icon_style);
-        ward.setOnClickListener(view -> {
-            try {
-                Intent w = new Intent(WardrobeActivity.this, style_hub.class);
-                startActivity(w);
-            } catch (Exception e) {
-                Log.e(TAG, "Error while starting Wardrobe activity", e);
-            }
-        });
-
-        ConstraintLayout container_profile = findViewById(R.id.container_profile);
-        container_profile.setOnClickListener(view -> {
-            try {
-                Intent u = new Intent(WardrobeActivity.this, user_profile.class);
-                startActivity(u);
-            } catch (Exception e) {
-                Log.e(TAG, "Error while starting user_profile activity", e);
-            }
-        });
-
-        LinearLayout container_work = findViewById(R.id.container_work);
-        container_work.setOnClickListener(view -> {
-            Intent w1 = new Intent(WardrobeActivity.this, work_space.class);
-            startActivity(w1);
-        });
-
-        more_icon.setOnClickListener(v -> {
-            Intent intent = new Intent(WardrobeActivity.this, AddItem.class);
-            startActivity(intent);
-        });
-
-      //  btnAll.setOnClickListener(v -> loadImages("All", email));
-       // btnUpper.setOnClickListener(v -> loadImages("Upper", email));
-     //   btnLower.setOnClickListener(v -> loadImages("Lower", email));
-      //  btnOthers.setOnClickListener(v -> loadImages("Accessory", email));
+        // Button click listeners
+        btnAll.setOnClickListener(v -> loadImages("All", email));
+        btnUpper.setOnClickListener(v -> loadImages("Upper", email));
+        btnLower.setOnClickListener(v -> loadImages("Lower", email));
+        btnOthers.setOnClickListener(v -> loadImages("Accessory", email));
 
         // Load all images by default
-       // loadImages("All", email);
+        loadImages("All", email);
 
         // Adjust padding for system bars
+        adjustSystemBars();
+    }
+
+    private void setupNavigation() {
+        ImageView hom = findViewById(R.id.icon_home);
+        hom.setOnClickListener(view -> navigateTo(home_page.class));
+
+        ImageView ward = findViewById(R.id.icon_style);
+        ward.setOnClickListener(view -> navigateTo(style_hub.class));
+
+        ConstraintLayout container_profile = findViewById(R.id.container_profile);
+        container_profile.setOnClickListener(view -> navigateTo(user_profile.class));
+
+        LinearLayout container_work = findViewById(R.id.container_work);
+        container_work.setOnClickListener(view -> navigateTo(work_space.class));
+
+        more_icon.setOnClickListener(v -> navigateTo(AddItem.class));
+    }
+
+    private void navigateTo(Class<?> targetClass) {
+        try {
+            Intent intent = new Intent(WardrobeActivity.this, targetClass);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "Error while starting " + targetClass.getSimpleName() + " activity", e);
+        }
+    }
+
+    private void adjustSystemBars() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container_profile), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -130,45 +129,56 @@ public class WardrobeActivity extends AppCompatActivity {
     private void loadImages(String category, String email) {
         imageList.clear(); // Clear existing images
 
-        Call<List<String>> call;
+        Call<List<Map<String, String>>> call;
         if (category.equals("All")) {
-            call = apiService.getAllApparelsByEmail(email);
+            call = dbConnectInstance.apiService.getAllApparelsByEmail(email);
         } else {
-            call = apiService.getApparelsByTypeAndEmail(email, category);
+            call = dbConnectInstance.apiService.getApparelsByTypeAndEmail(email, category.toLowerCase());
         }
 
-        call.enqueue(new Callback<List<String>>() {
+        call.enqueue(new Callback<List<Map<String, String>>>() {
             @Override
-            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+            public void onResponse(Call<List<Map<String, String>>> call, Response<List<Map<String, String>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<String> base64Images = response.body();
+                    List<Map<String, String>> base64Images = response.body();
 
-                    // Decode each Base64 string to byte[]
-                    for (String base64Image : base64Images) {
-                        byte[] imageBytes = Base64.decode(base64Image, Base64.DEFAULT);
-                        imageList.add(imageBytes); // Add to your image list
+                    // Process the body content
+                    for (Map<String, String> base64ImageFinder : base64Images) {
+                        String base64Image = base64ImageFinder.get("image"); // Ensure the key is correct
+                        Log.e("base64: ", base64Image);
+                        if (base64Image != null) {
+                            try {
+                                byte[] imageBytes = Base64.decode( base64Image.substring(base64Image.indexOf(",") + 1), Base64.DEFAULT);
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                imageList.add(bitmap); // Add Bitmap directly to the list
+                            } catch (Exception e) {
+                                Log.e(TAG, "Failed to decode image: " + e.getMessage());
+                            }
+                        }
                     }
 
                     imageAdapter.notifyDataSetChanged();
                     updateImageViewsVisibility(imageList.size());
+                } else {
+                    Log.e(TAG, "Response was not successful or body is null");
                 }
             }
 
             @Override
-            public void onFailure(Call<List<String>> call, Throwable t) {
-                Log.e(TAG, "Error fetching images", t);
+            public void onFailure(Call<List<Map<String, String>>> call, Throwable t) {
+                Log.e(TAG, "API call failed: " + t.getMessage());
             }
         });
     }
 
     private void updateImageViewsVisibility(int imageCount) {
+        // If there are images, hide the default placeholders
         if (imageCount > 0) {
-            // If there are images in the RecyclerView, hide the default images
             image1.setVisibility(View.GONE);
             image2.setVisibility(View.GONE);
             image3.setVisibility(View.GONE);
         } else {
-            // If there are no images, show the default images
+            // If no images, show default placeholders
             image1.setVisibility(View.VISIBLE);
             image2.setVisibility(View.VISIBLE);
             image3.setVisibility(View.VISIBLE);

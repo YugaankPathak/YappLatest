@@ -1,5 +1,5 @@
 package com.example.userloginsqlite;
-
+import java.util.Base64;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -13,7 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
+
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -44,7 +44,7 @@ public class AddItem extends AppCompatActivity {
     private byte[] imageBytes; // Store the image as a byte array for saving
     private dbConnect database; // Use the dbConnect class for network operations
     public int imagecount = 0;
-
+private Uri imageUri;
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingInflatedId")
     @Override
@@ -85,7 +85,7 @@ public class AddItem extends AppCompatActivity {
         // Image picker launcher
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
-                Uri imageUri = result.getData() != null ? result.getData().getData() : null;
+                imageUri = result.getData() != null ? result.getData().getData() : null;
                 if (imageUri != null) {
                     imageButton.setImageURI(imageUri);  // Show selected image
 
@@ -103,14 +103,14 @@ public class AddItem extends AppCompatActivity {
         });
 
         // Permission request launcher
-/*        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 imagePickerLauncher.launch(intent);
             } else {
                 Toast.makeText(AddItem.this, "Permission denied", Toast.LENGTH_SHORT).show();
             }
-        }); */
+        });
 
         imageButton.setOnClickListener(view -> handleImageSelection());
 
@@ -125,28 +125,31 @@ public class AddItem extends AppCompatActivity {
             String selectedCategory = spinner.getSelectedItem().toString();
             String color = ((EditText) findViewById(R.id.input_color)).getText().toString();
             String material = ((EditText) findViewById(R.id.input_material)).getText().toString();
-            boolean isPersonal = ((Switch) findViewById(R.id.switch2)).isChecked();
 
             Apparel apparel = new Apparel();
-
-           // if (isPersonal) apparel.setOwnership("Personal");
-            //else
             SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
             String userID = sharedPreferences.getString("userID", null);
-            Log.e("ID",userID);
+            Log.e("ID", userID != null ? userID : "userID is null");
 
-            int current_user= Integer.parseInt(userID);
-            apparel.setOwnership(current_user);  // Call to setOwnership
+            apparel.setOwnership(userID);
             apparel.setColor(color);
             apparel.setMaterial(material);
             apparel.setUpperLower(upper);
-            apparel.setType(selectedCategory);
-            if (imageBytes != null) {
-                String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-                apparel.setImageUrl(base64Image);  // Set the imageBlob in the Apparel object
+            apparel.setOccasion(selectedCategory);
+
+            // Assuming imageUri is available here
+            String mimeType = null;
+            if (imageUri != null) {
+                ContentResolver contentResolver = getContentResolver();
+                mimeType = contentResolver.getType(imageUri);
             }
 
-            //apparel.getInfo(apparel);
+            if (imageBytes != null && mimeType != null) {
+                String base64Image = "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(imageBytes);
+                apparel.setImage(base64Image);
+            }
+
+            Log.e("app", apparel.getImage() != null ? apparel.getImage() : "Image is null");
 
             // Create the apparel record using dbConnect
             database.createApparel(apparel);
@@ -156,7 +159,6 @@ public class AddItem extends AppCompatActivity {
             spinner.setSelection(0);
             ((EditText) findViewById(R.id.input_color)).setText("");
             ((EditText) findViewById(R.id.input_material)).setText("");
-            ((Switch) findViewById(R.id.switch2)).setChecked(false);
             imageButton.setImageResource(android.R.color.transparent);
 
             Toast.makeText(AddItem.this, "Apparel added successfully!", Toast.LENGTH_SHORT).show();
@@ -166,6 +168,7 @@ public class AddItem extends AppCompatActivity {
             intent.putExtra("IMAGE_COUNT", imagecount);
             startActivity(intent); // Clear selected image
         });
+
 
     }
 
@@ -195,7 +198,7 @@ public class AddItem extends AppCompatActivity {
     // Convert Bitmap to byte array
     private byte[] imageToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         return stream.toByteArray();
     }
 
